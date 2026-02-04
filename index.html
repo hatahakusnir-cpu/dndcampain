@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>D&D Legend Vault - Master Edition</title>
+    <title>D&D Legend Vault 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Spectral:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -11,47 +11,34 @@
         :root { --dnd-red: #8b0000; --accent-gold: #d4af37; --deep-bg: #0d0d0d; }
         body { background-color: var(--deep-bg); color: #e0e0e0; font-family: 'Spectral', serif; background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); }
         h1, h2, h3, .font-fantasy { font-family: 'MedievalSharp', cursive; letter-spacing: 1px; }
-        .stat-card { background: linear-gradient(145deg, #1e1e1e, #141414); border: 1px solid #333; border-top: 2px solid var(--accent-gold); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.2s; }
-        .stat-card:hover { border-color: var(--dnd-red); }
+        .stat-card { background: linear-gradient(145deg, #1e1e1e, #141414); border: 1px solid #333; border-top: 2px solid var(--accent-gold); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         input, textarea, select { background: rgba(0,0,0,0.6) !important; border: 1px solid #444 !important; color: #fff !important; border-radius: 4px; outline: none; }
-        input:focus { border-color: var(--accent-gold) !important; box-shadow: 0 0 5px rgba(212,175,55,0.3); }
-        .slot-dot, .death-dot { width: 13px; height: 13px; border: 2px solid #444; border-radius: 50%; cursor: pointer; transition: 0.2s; }
+        .slot-dot { width: 12px; height: 12px; border: 2px solid #444; border-radius: 50%; cursor: pointer; }
         .slot-dot.active { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; border-color: #fff; }
-        .death-dot.success.active { background: #10b981; box-shadow: 0 0 8px #10b981; border-color: #fff; }
-        .death-dot.fail.active { background: #ef4444; box-shadow: 0 0 8px #ef4444; border-color: #fff; }
         .btn-gold { background: linear-gradient(to bottom, #d4af37, #aa850b); color: #000; font-weight: bold; text-transform: uppercase; border-radius: 4px; transition: 0.2s; }
-        .btn-gold:hover { transform: scale(1.03); filter: brightness(1.1); }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: var(--accent-gold); border-radius: 10px; }
         .gold-text { color: var(--accent-gold); }
+        .desc-box { background: rgba(0,0,0,0.4); border-left: 2px solid var(--accent-gold); padding: 8px; margin-top: 5px; font-size: 11px; color: #aaa; font-style: italic; }
     </style>
 </head>
 <body class="p-2 md:p-6">
 
-    <header class="max-w-[1400px] mx-auto mb-6 flex flex-wrap justify-between items-center bg-[#111] p-4 rounded-lg border-b-2 border-gold shadow-2xl gap-4">
+    <header class="max-w-[1400px] mx-auto mb-6 flex flex-wrap justify-between items-center bg-[#111] p-4 rounded-lg border-b-2 border-gold gap-4 shadow-2xl">
         <div class="flex items-center gap-4">
-            <div class="bg-gradient-to-br from-yellow-600 to-red-900 p-3 rounded-full shadow-lg">
-                <i class="fa-solid fa-scroll text-black text-2xl"></i>
-            </div>
-            <div>
-                <select id="char-selector" onchange="switchCharacter()" class="bg-transparent text-xl font-bold gold-text cursor-pointer"></select>
-                <div class="text-[9px] uppercase tracking-[2px] text-gray-500">Ancient Vault v2.5</div>
-            </div>
+            <select id="char-selector" onchange="switchCharacter()" class="bg-transparent text-xl font-bold gold-text cursor-pointer border-none"></select>
+            <button onclick="createNewCharacter()" class="text-[10px] bg-white/5 px-2 py-1 rounded hover:bg-white/10 text-gray-400">+ Новий</button>
         </div>
         
-        <div class="flex gap-4">
-            <div class="flex gap-4 items-center bg-black/60 px-5 py-2 rounded-full border border-gray-800">
-                <button id="cloud-save-btn" onclick="syncToCloud()" title="Зберегти в хмару" class="text-blue-400 hover:text-blue-300 transition text-xl">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                </button>
-                <button id="cloud-load-btn" onclick="loadFromCloud()" title="Завантажити з хмари" class="text-green-400 hover:text-green-300 transition text-xl">
-                    <i class="fa-solid fa-cloud-arrow-down"></i>
-                </button>
-                <div class="w-[1px] h-5 bg-gray-700 mx-1"></div>
-                <button onclick="exportCharacter()" title="Експорт файлу" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-download"></i></button>
-                <label class="text-gray-400 hover:text-white transition cursor-pointer"><i class="fa-solid fa-upload"></i><input type="file" class="hidden" onchange="importCharacter(event)"></label>
+        <div class="flex flex-wrap gap-4 items-center bg-black/60 px-4 py-2 rounded-lg border border-gray-800">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] text-gray-500 uppercase font-bold">Cloud Key:</span>
+                <input type="text" id="cloud-key" placeholder="Твій ключ..." class="w-24 text-[10px] px-2 py-1 bg-black/40 border border-gray-700 rounded" oninput="saveKey()">
             </div>
-            <button onclick="createNewCharacter()" class="btn-gold px-5 py-2 text-[10px]">Новий Герой</button>
+            <div class="w-[1px] h-4 bg-gray-700"></div>
+            <button id="cloud-save-btn" onclick="syncToCloud()" class="text-blue-400 hover:text-blue-300 transition text-lg"><i class="fa-solid fa-cloud-arrow-up"></i></button>
+            <button id="cloud-load-btn" onclick="loadFromCloud()" class="text-green-400 hover:text-green-300 transition text-lg"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+            <div class="w-[1px] h-4 bg-gray-700"></div>
+            <button onclick="exportCharacter()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-download"></i></button>
+            <label class="text-gray-400 hover:text-white cursor-pointer"><i class="fa-solid fa-upload"></i><input type="file" class="hidden" onchange="importCharacter(event)"></label>
         </div>
     </header>
 
@@ -60,197 +47,141 @@
         <section class="space-y-6">
             <div class="stat-card p-5">
                 <input type="text" id="char-name" oninput="update('name')" class="w-full text-2xl font-bold bg-transparent border-none text-white mb-1" placeholder="Ім'я">
-                <div class="flex justify-between items-center">
-                    <input type="text" id="char-classLvl" oninput="update('classLvl')" class="text-xs gold-text font-bold bg-transparent border-none uppercase" placeholder="Клас / Рівень">
-                    <div class="text-[10px] text-gray-500">PROF: +<input type="number" id="char-prof" oninput="update('prof')" class="w-8 bg-transparent text-center font-bold"></div>
+                <div class="flex justify-between items-center text-xs">
+                    <input type="text" id="char-classLvl" oninput="update('classLvl')" class="gold-text font-bold bg-transparent border-none uppercase" placeholder="Клас/Рівень">
+                    <div class="text-gray-500">PROF: +<input type="number" id="char-prof" oninput="update('prof')" class="w-8 bg-transparent text-center border-none"></div>
                 </div>
             </div>
-
             <div id="stats-container" class="space-y-3"></div>
-
             <div class="stat-card p-4">
-                <h3 class="text-xs font-bold gold-text uppercase mb-3 italic flex justify-between">Навички <span>Мод.</span></h3>
-                <div id="skills-list" class="space-y-1.5 max-h-[350px] overflow-y-auto pr-1"></div>
+                <h3 class="text-xs font-bold gold-text uppercase mb-3 italic">Навички</h3>
+                <div id="skills-list" class="space-y-1.5 max-h-[350px] overflow-y-auto text-[11px]"></div>
             </div>
         </section>
 
         <section class="space-y-6">
             <div class="grid grid-cols-3 gap-4">
-                <div class="stat-card p-3 text-center border-t-2 border-blue-500">
-                    <div class="text-[8px] text-gray-500 uppercase font-bold">Armor Class</div>
-                    <input type="number" id="char-ac" oninput="update('ac')" class="w-full text-center text-3xl font-fantasy bg-transparent border-none">
-                </div>
-                <div class="stat-card p-3 text-center border-t-2 border-yellow-500">
-                    <div class="text-[8px] text-gray-500 uppercase font-bold">Initiative</div>
-                    <input type="number" id="char-init" oninput="update('init')" class="w-full text-center text-3xl font-fantasy bg-transparent border-none">
-                </div>
-                <div class="stat-card p-3 text-center border-t-2 border-green-500">
-                    <div class="text-[8px] text-gray-500 uppercase font-bold">Speed</div>
-                    <input type="text" id="char-speed" oninput="update('speed')" class="w-full text-center text-2xl font-fantasy bg-transparent border-none">
-                </div>
+                <div class="stat-card p-3 text-center border-t-2 border-blue-500"><div class="text-[8px] text-gray-500 font-bold">AC</div><input type="number" id="char-ac" oninput="update('ac')" class="w-full text-center text-3xl font-fantasy bg-transparent border-none"></div>
+                <div class="stat-card p-3 text-center border-t-2 border-yellow-500"><div class="text-[8px] text-gray-500 font-bold">INIT</div><input type="number" id="char-init" oninput="update('init')" class="w-full text-center text-3xl font-fantasy bg-transparent border-none"></div>
+                <div class="stat-card p-3 text-center border-t-2 border-green-500"><div class="text-[8px] text-gray-500 font-bold">SPD</div><input type="text" id="char-speed" oninput="update('speed')" class="w-full text-center text-2xl font-fantasy bg-transparent border-none"></div>
             </div>
-
             <div class="stat-card p-5">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-bold uppercase gold-text">Hit Points</span>
-                    <span class="text-lg font-fantasy text-green-500"><span id="cur-hp">0</span> <span class="text-gray-600 text-sm">/</span> <input type="number" id="char-maxHP" oninput="update('maxHP')" class="w-12 text-center bg-transparent border-none text-white text-lg"></span>
-                </div>
-                <div class="h-4 bg-black rounded-full border border-gray-800 p-0.5 mb-4 shadow-inner">
-                    <div id="hp-bar" class="h-full bg-gradient-to-r from-red-900 to-green-600 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(22,163,74,0.3)]"></div>
-                </div>
+                <div class="flex justify-between items-center mb-2"><span class="text-sm font-bold uppercase gold-text">HP</span><span class="text-lg font-fantasy text-green-500"><span id="cur-hp">0</span> / <input type="number" id="char-maxHP" oninput="update('maxHP')" class="w-12 text-center bg-transparent border-none"></span></div>
+                <div class="h-2 bg-black rounded-full mb-4"><div id="hp-bar" class="h-full bg-green-600 rounded-full transition-all duration-500"></div></div>
                 <div class="flex gap-2">
-                    <input type="number" id="hp-mod" placeholder="+/-" class="w-1/3 text-center text-lg font-bold">
-                    <button onclick="changeHP(-1)" class="flex-1 bg-red-900/20 hover:bg-red-900/40 border border-red-900/50 text-red-500 rounded font-bold text-[10px]">DAMAGE</button>
-                    <button onclick="changeHP(1)" class="flex-1 bg-green-900/20 hover:bg-green-900/40 border border-green-900/50 text-green-500 rounded font-bold text-[10px]">HEAL</button>
-                </div>
-                <div class="mt-4 flex justify-between items-center border-t border-gray-800 pt-3 text-[9px]">
-                    <span class="uppercase font-bold text-gray-500">Death Saves</span>
-                    <div class="flex gap-3">
-                        <div class="flex gap-1" id="ds-success">
-                            <div class="death-dot success" onclick="tglDS('success',0)"></div><div class="death-dot success" onclick="tglDS('success',1)"></div><div class="death-dot success" onclick="tglDS('success',2)"></div>
-                        </div>
-                        <div class="flex gap-1" id="ds-fail">
-                            <div class="death-dot fail" onclick="tglDS('fail',0)"></div><div class="death-dot fail" onclick="tglDS('fail',1)"></div><div class="death-dot fail" onclick="tglDS('fail',2)"></div>
-                        </div>
-                    </div>
+                    <input type="number" id="hp-mod" placeholder="+/-" class="w-1/3 text-center text-sm">
+                    <button onclick="changeHP(-1)" class="flex-1 bg-red-900/30 text-red-500 rounded text-[9px] font-bold">DAM</button>
+                    <button onclick="changeHP(1)" class="flex-1 bg-green-900/30 text-green-500 rounded text-[9px] font-bold">HEAL</button>
                 </div>
             </div>
-
             <div class="stat-card p-4 border-t-2 border-blue-900">
-                <h3 class="text-xs font-bold gold-text uppercase mb-4 flex justify-between">Магічні Комірки <span>(Slots)</span></h3>
+                <h3 class="text-xs font-bold gold-text uppercase mb-4">Комірки магії</h3>
                 <div id="slots-container" class="grid grid-cols-3 gap-3"></div>
-                <button onclick="longRest()" class="w-full mt-5 py-2 bg-black/40 border border-gray-800 rounded uppercase text-[9px] font-bold gold-text hover:bg-black transition">Long Rest / Повний відпочинок</button>
+                <button onclick="longRest()" class="w-full mt-5 py-1 bg-black/40 border border-gray-800 rounded uppercase text-[9px] gold-text">Відпочинок</button>
             </div>
         </section>
 
         <section class="space-y-6">
             <div class="stat-card p-4 border-t-2 border-red-900">
                 <h3 class="text-xs font-bold text-red-600 uppercase mb-3 italic">Арсенал</h3>
-                <div class="bg-black/50 p-3 rounded mb-4 space-y-2 border border-gray-800">
-                    <div class="flex gap-2"><input type="text" id="wp-n" placeholder="Меч..." class="flex-1 text-xs px-2"><input type="text" id="wp-a" placeholder="+Атк" class="w-12 text-center text-xs"></div>
-                    <textarea id="wp-d" placeholder="Шкода (напр. 1d8+3)..." class="w-full h-10 text-[10px] p-2"></textarea>
-                    <button onclick="addWp()" class="w-full btn-gold py-1 text-[10px]">Додати Атаку</button>
+                <div id="weapons-list" class="space-y-2 mb-3"></div>
+                <div class="bg-black/50 p-3 rounded space-y-2 border border-gray-800 text-[11px]">
+                    <div class="flex gap-1"><input type="text" id="wp-n" placeholder="Назва..." class="flex-1 px-2 py-1"><input type="text" id="wp-a" placeholder="+Атк" class="w-12 text-center"></div>
+                    <textarea id="wp-d" placeholder="Опис шкоди..." class="w-full h-12 p-2"></textarea>
+                    <button onclick="addWp()" class="w-full btn-gold py-1">Додати атаку</button>
                 </div>
-                <div id="weapons-list" class="space-y-2"></div>
             </div>
-
             <div class="stat-card p-4 border-t-2 border-purple-800">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-xs font-bold text-purple-400 uppercase italic">Книга заклинань</h3>
-                    <div class="text-[9px] text-gray-500 font-bold">DC <input type="number" id="char-mDC" oninput="update('mDC')" class="w-6 bg-transparent text-center border-none"></div>
+                <h3 class="text-xs font-bold text-purple-400 uppercase mb-3 italic">Заклинання</h3>
+                <div id="spell-list" class="max-h-80 overflow-y-auto space-y-1"></div>
+                <div class="mt-4 bg-black/50 p-3 rounded space-y-2 border border-gray-800 text-[11px]">
+                    <div class="flex gap-1"><input type="text" id="sp-n" placeholder="Назва..." class="flex-1 px-2 py-1"><select id="sp-l" class="w-14"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select></div>
+                    <textarea id="sp-d" placeholder="Опис магії..." class="w-full h-12 p-2"></textarea>
+                    <button onclick="addSpell()" class="w-full bg-purple-900 text-purple-100 py-1 rounded">Вивчити</button>
                 </div>
-                <div class="bg-black/50 p-3 rounded mb-4 space-y-2 border border-gray-800">
-                    <div class="flex gap-2">
-                        <input type="text" id="sp-n" placeholder="Назва..." class="flex-1 text-xs px-2">
-                        <select id="sp-l" class="text-[10px] w-14">
-                            <option value="0">C</option><option value="1">L1</option><option value="2">L2</option><option value="3">L3</option>
-                            <option value="4">L4</option><option value="5">L5</option><option value="6">L6</option><option value="7">L7</option>
-                            <option value="8">L8</option><option value="9">L9</option>
-                        </select>
-                    </div>
-                    <textarea id="sp-d" placeholder="Опис магії..." class="w-full h-10 text-[10px] p-2"></textarea>
-                    <button onclick="addSpell()" class="w-full bg-purple-900/40 hover:bg-purple-800 border border-purple-700 text-purple-300 py-1 text-[10px] rounded transition">Вивчити</button>
-                </div>
-                <div id="spell-list" class="max-h-80 overflow-y-auto pr-1"></div>
             </div>
         </section>
 
         <section class="space-y-6">
             <div class="stat-card p-4 border-t-2 border-yellow-700">
-                <h3 class="text-xs font-bold text-yellow-600 uppercase mb-3 flex justify-between italic">Рюкзак <i class="fa-solid fa-coins"></i></h3>
-                <div class="grid grid-cols-4 gap-1 mb-4">
-                    <div><div class="text-[7px] text-center text-orange-400 font-bold">CP</div><input type="number" id="char-cp" oninput="update('cp')" class="w-full text-center text-[10px]"></div>
-                    <div><div class="text-[7px] text-center text-gray-400 font-bold">SP</div><input type="number" id="char-sp" oninput="update('sp')" class="w-full text-center text-[10px]"></div>
-                    <div><div class="text-[7px] text-center text-yellow-500 font-bold">GP</div><input type="number" id="char-gp" oninput="update('gp')" class="w-full text-center text-[10px]"></div>
-                    <div><div class="text-[7px] text-center text-blue-300 font-bold">PP</div><input type="number" id="char-pp" oninput="update('pp')" class="w-full text-center text-[10px]"></div>
+                <h3 class="text-xs font-bold text-yellow-600 uppercase mb-3">Рюкзак</h3>
+                <div id="inv-list" class="space-y-1.5 max-h-48 overflow-y-auto mb-3 text-[11px]"></div>
+                <div class="bg-black/50 p-3 rounded border border-gray-800 space-y-2 text-[11px]">
+                    <input type="text" id="it-n" placeholder="Річ..." class="w-full px-2 py-1">
+                    <textarea id="it-d" placeholder="Властивості..." class="w-full h-12 p-2"></textarea>
+                    <button onclick="addIt()" class="w-full bg-yellow-900 text-yellow-500 py-1 rounded">Покласти</button>
                 </div>
-                <div class="bg-black/50 p-3 rounded mb-4 space-y-2 border border-gray-800">
-                    <input type="text" id="it-n" placeholder="Назва речі..." class="w-full text-xs px-2">
-                    <textarea id="it-d" placeholder="Опис (вага, ціна)..." class="w-full h-10 text-[10px] p-2"></textarea>
-                    <button onclick="addIt()" class="w-full bg-yellow-900/30 hover:bg-yellow-900/50 border border-yellow-700 text-yellow-500 py-1 text-[10px] rounded transition">Покласти</button>
-                </div>
-                <div id="inv-list" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
             </div>
-
-            <div class="stat-card p-4 flex-1 flex flex-col min-h-[350px]">
-                <h3 class="text-xs font-bold gold-text uppercase mb-2 italic border-b border-gray-800 pb-2">Нотатки</h3>
-                <textarea id="char-notes" oninput="update('notes')" class="flex-1 w-full bg-transparent border-none text-[12px] leading-relaxed resize-none p-0 outline-none scrollbar-hide" placeholder="Твоя історія..."></textarea>
+            <div class="stat-card p-4 flex-1 flex flex-col min-h-[300px]">
+                <h3 class="text-xs font-bold gold-text uppercase mb-2">Нотатки</h3>
+                <textarea id="char-notes" oninput="update('notes')" class="flex-1 w-full bg-transparent border-none text-[12px] p-0 resize-none outline-none"></textarea>
             </div>
         </section>
     </main>
 
     <script>
-        // ВСТАВ СВОЄ ПОСИЛАННЯ ТУТ:
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2UbELAtnHjIA2KMZrBAU9R-4MTgkQenPOqEpv-U-u39TYpHvnZgFTg98cO87dAODr1w/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5DNoXPfR6fASr9rE77D3YLMCkvlv3i2QpuCBUyG7_cY1u9s2wyhNKOMFSkrVYV9E9LQ/exec";
 
         const skillList = ["Атлетика (STR)", "Акробатика (DEX)", "Скритність (DEX)", "Ловкість рук (DEX)", "Аналіз (INT)", "Історія (INT)", "Магія (INT)", "Природа (INT)", "Релігія (INT)", "Уважність (WIS)", "Виживання (WIS)", "Медицина (WIS)", "Прозорливість (WIS)", "Тварини (WIS)", "Виступ (CHA)", "Залякування (CHA)", "Обман (CHA)", "Переконання (CHA)"];
         const maxSlots = [4, 3, 3, 3, 3, 2, 2, 1, 1]; 
 
         const template = {
             name: "Герой", classLvl: "Рівень 1", stats: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
-            ac: 10, init: 0, speed: "30", curHP: 10, maxHP: 10, prof: 2, mDC: 8,
-            cp: 0, sp: 0, gp: 0, pp: 0, inventory: [], spells: [], weapons: [], notes: "",
-            slots: [0,0,0,0,0,0,0,0,0], ds: { success: [false,false,false], fail: [false,false,false] }
+            ac: 10, init: 0, speed: "30", curHP: 10, maxHP: 10, prof: 2,
+            inventory: [], spells: [], weapons: [], notes: "",
+            slots: [0,0,0,0,0,0,0,0,0]
         };
 
-        let chars = JSON.parse(localStorage.getItem('dnd_legend_v9')) || [{...template}];
+        let chars = JSON.parse(localStorage.getItem('dnd_legend_multi')) || [{...template}];
         let idx = parseInt(localStorage.getItem('dnd_legend_idx')) || 0;
 
-        window.onload = load;
+        window.onload = () => {
+            document.getElementById('cloud-key').value = localStorage.getItem('dnd_cloud_key') || '';
+            load();
+        };
+
+        function saveKey() { localStorage.setItem('dnd_cloud_key', document.getElementById('cloud-key').value); }
 
         async function syncToCloud() {
+            const key = document.getElementById('cloud-key').value;
+            if (!key) return alert("Введи Cloud Key!");
             const btn = document.getElementById('cloud-save-btn');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             try {
-                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(chars) });
-                alert("Дані відправлено в хмару!");
-            } catch (e) { alert("Помилка збереження!"); }
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ key: key, chars: chars })
+                });
+                alert("Дані збережено для ключа: " + key);
+            } catch (e) { alert("Помилка."); }
             finally { btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i>'; }
         }
 
-       function loadFromCloud() {
-    const btn = document.getElementById('cloud-load-btn');
-    const originalIcon = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        function loadFromCloud() {
+            const key = document.getElementById('cloud-key').value;
+            if (!key) return alert("Введи ключ!");
+            const btn = document.getElementById('cloud-load-btn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-    const cbName = 'dnd_cb_' + Date.now();
-    
-    window[cbName] = function(data) {
-        if (data && Array.isArray(data)) {
-            chars = data;
-            idx = 0;
-            save(); // локальне збереження
-            load(); // оновлення інтерфейсу
-            alert("Герої прибули з хмари!");
-        } else {
-            alert("Хмара відповіла, але дані дивні або порожні.");
+            const cbName = 'cb_' + Date.now();
+            window[cbName] = function(data) {
+                if (data && data.length > 0) { chars = data; idx = 0; save(); load(); alert("Успішно завантажено!"); }
+                else { alert("Нічого не знайдено."); }
+                cleanup();
+            };
+
+            const cleanup = () => { delete window[cbName]; if(document.getElementById('jsonp')) document.getElementById('jsonp').remove(); btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>'; };
+            const script = document.createElement('script');
+            script.id = 'jsonp';
+            script.src = GOOGLE_SCRIPT_URL + "?key=" + encodeURIComponent(key) + "&callback=" + cbName;
+            document.body.appendChild(script);
         }
-        cleanup();
-    };
 
-    function cleanup() {
-        delete window[cbName];
-        const old = document.getElementById('cloud-script');
-        if (old) old.remove();
-        btn.innerHTML = originalIcon;
-    }
-
-    const script = document.createElement('script');
-    script.id = 'cloud-script';
-    // Додаємо &t= з часом, щоб обійти кеш
-    script.src = GOOGLE_SCRIPT_URL + "?callback=" + cbName + "&t=" + Date.now();
-    
-    script.onerror = () => {
-        alert("Помилка зв'язку. Перевір консоль (F12) або посилання.");
-        cleanup();
-    };
-
-    document.body.appendChild(script);
-}
         function load() {
             if (!chars[idx]) idx = 0;
             const c = chars[idx];
-            ['name','classLvl','prof','ac','init','speed','maxHP','mDC','cp','sp','gp','pp','notes'].forEach(f => {
+            ['name','classLvl','prof','ac','init','speed','maxHP','notes'].forEach(f => {
                 const el = document.getElementById(`char-${f}`);
                 if (el) el.value = c[f] !== undefined ? c[f] : "";
             });
@@ -258,7 +189,7 @@
         }
 
         function renderAll() {
-            renderStats(); renderSkills(); renderHP(); renderDS(); renderInv(); renderSpells(); renderWeapons(); renderSlots(); renderSelector();
+            renderStats(); renderSkills(); renderHP(); renderInv(); renderSpells(); renderWeapons(); renderSlots(); renderSelector();
         }
 
         function update(f) {
@@ -270,7 +201,7 @@
         }
 
         function save() {
-            localStorage.setItem('dnd_legend_v9', JSON.stringify(chars));
+            localStorage.setItem('dnd_legend_multi', JSON.stringify(chars));
             localStorage.setItem('dnd_legend_idx', idx);
         }
 
@@ -278,10 +209,10 @@
             const cont = document.getElementById('stats-container');
             cont.innerHTML = Object.entries(chars[idx].stats).map(([k, v]) => {
                 const mod = Math.floor((v-10)/2);
-                return `<div class="stat-card p-3 flex justify-between items-center px-6 border-l-4 border-gold shadow-lg">
-                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">${k}</span>
-                    <input type="number" value="${v}" oninput="uStat('${k}',this.value)" class="w-12 text-center text-xl font-fantasy bg-transparent border-none">
-                    <span class="text-sm gold-text font-bold w-10 text-right italic">${mod >= 0 ? '+' : ''}${mod}</span>
+                return `<div class="stat-card p-3 flex justify-between items-center px-4 border-l-4 border-gold">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase">${k}</span>
+                    <input type="number" value="${v}" oninput="uStat('${k}',this.value)" class="w-10 text-center text-xl font-fantasy bg-transparent border-none">
+                    <span class="text-sm gold-text font-bold w-8 text-right italic">${mod >= 0 ? '+' : ''}${mod}</span>
                 </div>`;
             }).join('');
         }
@@ -291,10 +222,7 @@
             document.getElementById('skills-list').innerHTML = skillList.map(s => {
                 const statKey = s.match(/\((.*?)\)/)[1];
                 const mod = Math.floor((chars[idx].stats[statKey]-10)/2);
-                return `<div class="flex justify-between items-center text-[11px] border-b border-white/5 py-1 px-1 hover:bg-white/5 transition">
-                    <span class="text-gray-400 font-medium">${s.split(' (')[0]}</span>
-                    <span class="font-bold gold-text">${mod >= 0 ? '+' : ''}${mod}</span>
-                </div>`;
+                return `<div class="flex justify-between items-center border-b border-white/5 py-1"><span>${s.split(' (')[0]}</span><span class="gold-text">${mod >= 0 ? '+' : ''}${mod}</span></div>`;
             }).join('');
         }
 
@@ -312,113 +240,76 @@
 
         function renderSlots() {
             const cont = document.getElementById('slots-container');
-            cont.innerHTML = maxSlots.map((max, levelIdx) => `
-                <div class="bg-black/30 p-2 rounded-lg text-center border border-gray-900">
-                    <div class="text-[8px] text-gray-500 mb-1 font-bold uppercase">L${levelIdx+1}</div>
+            cont.innerHTML = maxSlots.map((max, lvlIdx) => `
+                <div class="bg-black/30 p-2 rounded text-center border border-gray-900">
+                    <div class="text-[8px] text-gray-500 mb-1">LVL ${lvlIdx+1}</div>
                     <div class="flex justify-center gap-1">${Array.from({length: max}, (_, i) => `
-                        <div onclick="tglSlot(${levelIdx}, ${i})" class="slot-dot ${i < (chars[idx].slots[levelIdx] || 0) ? 'active' : ''}"></div>
+                        <div onclick="tglSlot(${lvlIdx}, ${i})" class="slot-dot ${i < (chars[idx].slots[lvlIdx] || 0) ? 'active' : ''}"></div>
                     `).join('')}</div>
                 </div>`).join('');
         }
-        function tglSlot(lvl, i) { chars[idx].slots[lvl] = chars[idx].slots[lvl] === i + 1 ? i : i + 1; renderSlots(); save(); }
+        function tglSlot(lvl, i) { chars[idx].slots[lvl] = (chars[idx].slots[lvl] === i + 1) ? i : i + 1; renderSlots(); save(); }
 
         function addWp() {
-            const n = document.getElementById('wp-n').value;
-            const a = document.getElementById('wp-a').value;
-            const d = document.getElementById('wp-d').value;
-            if(n) { chars[idx].weapons.push({name:n, atk:a, desc:d}); document.getElementById('wp-n').value=''; document.getElementById('wp-d').value=''; renderWeapons(); save(); }
+            const n = document.getElementById('wp-n').value, a = document.getElementById('wp-a').value, d = document.getElementById('wp-d').value;
+            if(n) { chars[idx].weapons.push({name:n, atk:a, desc:d}); document.getElementById('wp-n').value=''; document.getElementById('wp-a').value=''; document.getElementById('wp-d').value=''; renderWeapons(); save(); }
         }
         function renderWeapons() {
             document.getElementById('weapons-list').innerHTML = chars[idx].weapons.map((w, i) => `
-                <div class="bg-black/40 p-2 rounded border border-red-900/20 shadow-lg">
-                    <div class="flex justify-between items-center text-[11px] cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                        <span class="font-bold"><i class="fa-solid fa-gavel mr-2 text-red-900"></i>${w.name} <span class="text-red-500 ml-2 font-fantasy">${w.atk}</span></span>
-                        <button onclick="event.stopPropagation(); chars[idx].weapons.splice(${i},1); renderWeapons(); save()" class="text-gray-700 hover:text-red-500 transition">✕</button>
+                <div class="bg-black/40 p-2 rounded border border-red-900/20 text-[11px]">
+                    <div class="flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <span><b class="text-red-500">${w.atk}</b> ${w.name}</span>
+                        <button onclick="chars[idx].weapons.splice(${i},1); renderWeapons(); save()" class="text-gray-700">✕</button>
                     </div>
-                    <div class="hidden text-[10px] text-gray-400 mt-2 p-2 border-t border-red-900/10 italic">${w.desc}</div>
+                    <div class="hidden desc-box">${w.desc || 'Немає опису...'}</div>
                 </div>`).join('');
         }
 
         function addSpell() {
-            const n = document.getElementById('sp-n').value;
-            const l = parseInt(document.getElementById('sp-l').value);
-            const d = document.getElementById('sp-d').value;
+            const n = document.getElementById('sp-n').value, l = parseInt(document.getElementById('sp-l').value), d = document.getElementById('sp-d').value;
             if(n) { chars[idx].spells.push({name:n, lvl:l, desc:d}); document.getElementById('sp-n').value=''; document.getElementById('sp-d').value=''; renderSpells(); save(); }
         }
         function renderSpells() {
-            const list = document.getElementById('spell-list');
             const sorted = [...chars[idx].spells].sort((a,b) => a.lvl - b.lvl);
             let html = '', lastLvl = -1;
             sorted.forEach(s => {
                 if(s.lvl !== lastLvl) {
-                    html += `<div class="text-[9px] gold-text font-bold uppercase mt-3 mb-1 border-b border-purple-900/30 pb-1 italic">${s.lvl==0?'Замовляння':'Рівень '+s.lvl}</div>`;
+                    html += `<div class="text-[9px] gold-text font-bold uppercase mt-3 mb-1 border-b border-purple-900/30">${s.lvl==0?'Cantrips':'Level '+s.lvl}</div>`;
                     lastLvl = s.lvl;
                 }
-                const originalIdx = chars[idx].spells.indexOf(s);
-                html += `<div class="bg-black/20 p-2 border-b border-purple-900/10">
-                    <div class="flex justify-between items-center text-[11px] cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                        <span class="hover:text-purple-400 transition">${s.name}</span>
-                        <button onclick="event.stopPropagation(); chars[idx].spells.splice(${originalIdx},1); renderSpells(); save()" class="text-gray-600">✕</button>
+                const oIdx = chars[idx].spells.indexOf(s);
+                html += `<div class="p-1 border-b border-white/5 text-[11px]">
+                    <div class="flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <span>${s.name}</span>
+                        <button onclick="chars[idx].spells.splice(${oIdx},1); renderSpells(); save()" class="text-gray-700">✕</button>
                     </div>
-                    <div class="hidden text-[10px] text-gray-400 mt-2 p-2 bg-black/60 rounded border border-purple-900/20 italic">${s.desc}</div>
+                    <div class="hidden desc-box">${s.desc || 'Немає опису...'}</div>
                 </div>`;
             });
-            list.innerHTML = html || '<div class="text-[10px] text-gray-600 italic text-center py-4">Книга порожня</div>';
+            document.getElementById('spell-list').innerHTML = html;
         }
 
         function addIt() {
-            const n = document.getElementById('it-n').value;
-            const d = document.getElementById('it-d').value;
+            const n = document.getElementById('it-n').value, d = document.getElementById('it-d').value;
             if(n) { chars[idx].inventory.push({name:n, desc:d}); document.getElementById('it-n').value=''; document.getElementById('it-d').value=''; renderInv(); save(); }
         }
         function renderInv() {
             document.getElementById('inv-list').innerHTML = chars[idx].inventory.map((it, i) => `
-                <div class="bg-black/30 p-2 rounded text-[11px] border border-gray-800">
+                <div class="py-1 border-b border-white/5">
                     <div class="flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                        <span><i class="fa-solid fa-gem mr-2 text-yellow-700"></i>${it.name}</span>
-                        <button onclick="event.stopPropagation(); chars[idx].inventory.splice(${i},1); renderInv(); save()" class="text-gray-700 hover:text-red-500">✕</button>
+                        <span>${it.name}</span>
+                        <button onclick="chars[idx].inventory.splice(${i},1); renderInv(); save()" class="text-gray-700">✕</button>
                     </div>
-                    <div class="hidden text-[10px] text-gray-500 pt-2 mt-1 border-t border-gray-800 italic">${it.desc}</div>
+                    <div class="hidden desc-box">${it.desc || 'Порожньо...'}</div>
                 </div>`).join('');
         }
 
-        function tglDS(t, i) { chars[idx].ds[t][i] = !chars[idx].ds[t][i]; renderDS(); save(); }
-        function renderDS() {
-            chars[idx].ds.success.forEach((v, i) => document.querySelectorAll('#ds-success .death-dot')[i].classList.toggle('active', v));
-            chars[idx].ds.fail.forEach((v, i) => document.querySelectorAll('#ds-fail .death-dot')[i].classList.toggle('active', v));
-        }
-
-        function longRest() {
-            if(confirm("Відпочити? Це відновить здоров'я та всі магічні сили.")) {
-                chars[idx].curHP = chars[idx].maxHP;
-                chars[idx].slots = [0,0,0,0,0,0,0,0,0];
-                chars[idx].ds = { success:[false,false,false], fail:[false,false,false] };
-                save(); renderAll();
-            }
-        }
-
-        function exportCharacter() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chars));
-            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", chars[idx].name + "_vault.json"); dl.click();
-        }
-        function importCharacter(ev) {
-            const reader = new FileReader();
-            reader.onload = (e) => { chars = JSON.parse(e.target.result); idx = 0; save(); load(); alert("Імпортовано!"); };
-            reader.readAsText(ev.target.files[0]);
-        }
-
-        function renderSelector() {
-            document.getElementById('char-selector').innerHTML = chars.map((c, i) => `<option value="${i}" ${i==idx?'selected':''}>${c.name}</option>`).join('');
-        }
+        function longRest() { if(confirm("Відпочити?")) { chars[idx].curHP = chars[idx].maxHP; chars[idx].slots = [0,0,0,0,0,0,0,0,0]; renderAll(); save(); } }
+        function renderSelector() { document.getElementById('char-selector').innerHTML = chars.map((c, i) => `<option value="${i}" ${i==idx?'selected':''}>${c.name}</option>`).join(''); }
         function switchCharacter() { idx = parseInt(document.getElementById('char-selector').value); load(); save(); }
         function createNewCharacter() { chars.push(JSON.parse(JSON.stringify(template))); idx = chars.length - 1; load(); save(); }
-        function deleteCurrentCharacter() { if(chars.length > 1 && confirm("Видалити персонажа назавжди?")) { chars.splice(idx, 1); idx = 0; load(); save(); } }
+        function exportCharacter() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chars)); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "chars.json"); dl.click(); }
+        function importCharacter(ev) { const reader = new FileReader(); reader.onload = (e) => { chars = JSON.parse(e.target.result); idx = 0; save(); load(); }; reader.readAsText(ev.target.files[0]); }
     </script>
 </body>
 </html>
-
-
-
-
-
-
