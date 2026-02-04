@@ -181,7 +181,7 @@
 
     <script>
         // ВСТАВ СВОЄ ПОСИЛАННЯ ТУТ:
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQ00Zy0XwbSNpG_1FAdExFDX6bYymaD3m1ZO0lQ556fapiBrSMekrZyiRIxTzDil5UTw/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2UbELAtnHjIA2KMZrBAU9R-4MTgkQenPOqEpv-U-u39TYpHvnZgFTg98cO87dAODr1w/exec";
 
         const skillList = ["Атлетика (STR)", "Акробатика (DEX)", "Скритність (DEX)", "Ловкість рук (DEX)", "Аналіз (INT)", "Історія (INT)", "Магія (INT)", "Природа (INT)", "Релігія (INT)", "Уважність (WIS)", "Виживання (WIS)", "Медицина (WIS)", "Прозорливість (WIS)", "Тварини (WIS)", "Виступ (CHA)", "Залякування (CHA)", "Обман (CHA)", "Переконання (CHA)"];
         const maxSlots = [4, 3, 3, 3, 3, 2, 2, 1, 1]; 
@@ -208,38 +208,43 @@
             finally { btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i>'; }
         }
 
-        function loadFromCloud() {
+       function loadFromCloud() {
     const btn = document.getElementById('cloud-load-btn');
+    const originalIcon = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-    const callbackName = 'cb_' + Date.now();
+    const cbName = 'dnd_cb_' + Date.now();
     
-    window[callbackName] = function(data) {
-        console.log("Дані отримано:", data);
-        if (data) {
+    window[cbName] = function(data) {
+        if (data && Array.isArray(data)) {
             chars = data;
             idx = 0;
-            save();
-            load();
-            alert("Синхронізація успішна!");
+            save(); // локальне збереження
+            load(); // оновлення інтерфейсу
+            alert("Герої прибули з хмари!");
+        } else {
+            alert("Хмара відповіла, але дані дивні або порожні.");
         }
         cleanup();
     };
 
     function cleanup() {
-        delete window[callbackName];
-        const sc = document.getElementById('jsonp-temp');
-        if (sc) sc.remove();
-        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>';
+        delete window[cbName];
+        const old = document.getElementById('cloud-script');
+        if (old) old.remove();
+        btn.innerHTML = originalIcon;
     }
 
     const script = document.createElement('script');
-    script.id = 'jsonp-temp';
-    script.src = GOOGLE_SCRIPT_URL + "?callback=" + callbackName;
+    script.id = 'cloud-script';
+    // Додаємо &t= з часом, щоб обійти кеш
+    script.src = GOOGLE_SCRIPT_URL + "?callback=" + cbName + "&t=" + Date.now();
+    
     script.onerror = () => {
-        alert("Помилка зв'язку з Google. Перевір посилання у коді!");
+        alert("Помилка зв'язку. Перевір консоль (F12) або посилання.");
         cleanup();
     };
+
     document.body.appendChild(script);
 }
         function load() {
@@ -411,6 +416,7 @@
     </script>
 </body>
 </html>
+
 
 
 
