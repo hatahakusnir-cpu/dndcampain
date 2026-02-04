@@ -181,7 +181,7 @@
 
     <script>
         // ВСТАВ СВОЄ ПОСИЛАННЯ ТУТ:
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0q5FjxA-XUkmLhUl_-3JYNlv9UzkU4CFZmPTU7eMjOtMtw1uGvLGQ6dMk_X7YV8IGDQ/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqCfYNVpoE2FTDE_Rpt-RYOaKIPyACduRxjUl0CiHDo4lg6_vr9SrIRnufRPBrd94F0A/exec";
 
         const skillList = ["Атлетика (STR)", "Акробатика (DEX)", "Скритність (DEX)", "Ловкість рук (DEX)", "Аналіз (INT)", "Історія (INT)", "Магія (INT)", "Природа (INT)", "Релігія (INT)", "Уважність (WIS)", "Виживання (WIS)", "Медицина (WIS)", "Прозорливість (WIS)", "Тварини (WIS)", "Виступ (CHA)", "Залякування (CHA)", "Обман (CHA)", "Переконання (CHA)"];
         const maxSlots = [4, 3, 3, 3, 3, 2, 2, 1, 1]; 
@@ -208,38 +208,43 @@
             finally { btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i>'; }
         }
 
-        async function loadFromCloud() {
+        function loadFromCloud() {
     const btn = document.getElementById('cloud-load-btn');
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-    try {
-        // Додаємо параметр redirect: 'follow', щоб обійти внутрішні перенаправлення Google
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'GET',
-            redirect: 'follow' 
-        });
-
-        if (!response.ok) throw new Error('Network response was not ok');
-
-        const remoteData = await response.json();
-        
-        if (remoteData && Array.isArray(remoteData)) {
-            chars = remoteData;
+    // Створюємо унікальне ім'я функції для відповіді
+    const callbackName = 'google_jsonp_callback_' + Math.round(Math.random() * 1000000);
+    
+    // Створюємо тимчасову функцію, яку викличе Google
+    window[callbackName] = function(data) {
+        if (data && Array.isArray(data)) {
+            chars = data;
             idx = 0;
-            save(); // Зберігаємо в пам'ять браузера
-            load(); // Оновлюємо екран
-            alert("Дані успішно синхронізовано з хмарою!");
+            save();
+            load();
+            alert("Дані успішно синхронізовано!");
         } else {
-            alert("Хмара порожня або формат даних невірний.");
+            alert("Хмара порожня або дані пошкоджені.");
         }
-    } catch (e) {
-        console.error("Помилка завантаження:", e);
-        alert("Помилка завантаження! Переконайся, що в таблиці є дані та посилання вірне.");
-    } finally {
+        
+        // Прибираємо за собою
+        delete window[callbackName];
+        document.body.removeChild(script);
         btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>';
-    }
-}
+    };
 
+    // Створюємо тег скрипта для запиту
+    const script = document.createElement('script');
+    script.src = GOOGLE_SCRIPT_URL + "?callback=" + callbackName;
+    
+    // Якщо за 10 секунд не завантажиться - видаємо помилку
+    script.onerror = function() {
+        alert("Помилка мережі або невірне посилання.");
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>';
+    };
+
+    document.body.appendChild(script);
+}
         function load() {
             if (!chars[idx]) idx = 0;
             const c = chars[idx];
@@ -409,5 +414,6 @@
     </script>
 </body>
 </html>
+
 
 
