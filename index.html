@@ -181,7 +181,7 @@
 
     <script>
         // ВСТАВ СВОЄ ПОСИЛАННЯ ТУТ:
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQbz9JUWNCYN7K7zuObRY-U-0SXKThAak6tGgbnjR_9Q8ryCWxXjeqqRJDblNMAiTj/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0q5FjxA-XUkmLhUl_-3JYNlv9UzkU4CFZmPTU7eMjOtMtw1uGvLGQ6dMk_X7YV8IGDQ/exec";
 
         const skillList = ["Атлетика (STR)", "Акробатика (DEX)", "Скритність (DEX)", "Ловкість рук (DEX)", "Аналіз (INT)", "Історія (INT)", "Магія (INT)", "Природа (INT)", "Релігія (INT)", "Уважність (WIS)", "Виживання (WIS)", "Медицина (WIS)", "Прозорливість (WIS)", "Тварини (WIS)", "Виступ (CHA)", "Залякування (CHA)", "Обман (CHA)", "Переконання (CHA)"];
         const maxSlots = [4, 3, 3, 3, 3, 2, 2, 1, 1]; 
@@ -209,15 +209,36 @@
         }
 
         async function loadFromCloud() {
-            const btn = document.getElementById('cloud-load-btn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL);
-                const data = await response.json();
-                if (data) { chars = data; save(); load(); alert("Хмарні дані завантажено!"); }
-            } catch (e) { alert("Помилка! Можливо, посилання невірне або хмара порожня."); }
-            finally { btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>'; }
+    const btn = document.getElementById('cloud-load-btn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+        // Додаємо параметр redirect: 'follow', щоб обійти внутрішні перенаправлення Google
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'GET',
+            redirect: 'follow' 
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const remoteData = await response.json();
+        
+        if (remoteData && Array.isArray(remoteData)) {
+            chars = remoteData;
+            idx = 0;
+            save(); // Зберігаємо в пам'ять браузера
+            load(); // Оновлюємо екран
+            alert("Дані успішно синхронізовано з хмарою!");
+        } else {
+            alert("Хмара порожня або формат даних невірний.");
         }
+    } catch (e) {
+        console.error("Помилка завантаження:", e);
+        alert("Помилка завантаження! Переконайся, що в таблиці є дані та посилання вірне.");
+    } finally {
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>';
+    }
+}
 
         function load() {
             if (!chars[idx]) idx = 0;
@@ -388,4 +409,5 @@
     </script>
 </body>
 </html>
+
 
