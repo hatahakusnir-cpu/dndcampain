@@ -159,24 +159,54 @@
         }
 
         function loadFromCloud() {
-            const key = document.getElementById('cloud-key').value;
-            if (!key) return alert("Введи ключ!");
-            const btn = document.getElementById('cloud-load-btn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    const key = document.getElementById('cloud-key').value;
+    if (!key) return alert("Введи ключ!");
+    
+    const btn = document.getElementById('cloud-load-btn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-            const cbName = 'cb_' + Date.now();
-            window[cbName] = function(data) {
-                if (data && data.length > 0) { chars = data; idx = 0; save(); load(); alert("Успішно завантажено!"); }
-                else { alert("Нічого не знайдено."); }
-                cleanup();
-            };
+    const cbName = 'cb_' + Date.now();
+    
+    // Створюємо таймер на 5 секунд
+    const timeout = setTimeout(() => {
+        cleanup();
+        alert("Час очікування вичерпано. Перевір посилання або інтернет.");
+    }, 5000);
 
-            const cleanup = () => { delete window[cbName]; if(document.getElementById('jsonp')) document.getElementById('jsonp').remove(); btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>'; };
-            const script = document.createElement('script');
-            script.id = 'jsonp';
-            script.src = GOOGLE_SCRIPT_URL + "?key=" + encodeURIComponent(key) + "&callback=" + cbName;
-            document.body.appendChild(script);
+    window[cbName] = function(data) {
+        clearTimeout(timeout); // Скасовуємо таймер, якщо дані прийшли
+        if (data && Array.isArray(data) && data.length > 0) {
+            chars = data;
+            idx = 0;
+            save();
+            load();
+            alert("Герої прибули з хмари!");
+        } else {
+            alert("За цим ключем порожньо.");
         }
+        cleanup();
+    };
+
+    function cleanup() {
+        delete window[cbName];
+        const old = document.getElementById('jsonp');
+        if (old) old.remove();
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>';
+    }
+
+    const script = document.createElement('script');
+    script.id = 'jsonp';
+    // Додаємо випадкове число, щоб уникнути кешування браузером
+    script.src = GOOGLE_SCRIPT_URL + "?key=" + encodeURIComponent(key) + "&callback=" + cbName + "&v=" + Date.now();
+    
+    script.onerror = () => {
+        clearTimeout(timeout);
+        alert("Помилка скрипта. Перевір Deployment URL.");
+        cleanup();
+    };
+    
+    document.body.appendChild(script);
+}
 
         function load() {
             if (!chars[idx]) idx = 0;
@@ -313,3 +343,4 @@
     </script>
 </body>
 </html>
+
