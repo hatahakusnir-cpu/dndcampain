@@ -131,22 +131,22 @@
         <section class="space-y-6">
             <div class="grid grid-cols-3 gap-4">
                 <div class="stat-card p-3 text-center border-t-2 border-blue-500">
-                    <div class="text-[9px] text-gray-500 uppercase font-bold">Armor Class</div>
+                    <div class="text-[9px] text-gray-500 uppercase font-bold">Клас Обладунка</div>
                     <input type="number" id="char-ac" oninput="update('ac')" class="w-full text-center text-3xl font-fantasy bg-transparent border-none">
                 </div>
                 <div class="stat-card p-3 text-center border-t-2 border-yellow-500">
-                    <div class="text-[9px] text-gray-500 uppercase font-bold">Initiative</div>
+                    <div class="text-[9px] text-gray-500 uppercase font-bold">Ініціатива</div>
                     <input type="number" id="char-init" oninput="update('init')" class="w-full text-center text-3xl font-fantasy bg-transparent border-none">
                 </div>
                 <div class="stat-card p-3 text-center border-t-2 border-green-500">
-                    <div class="text-[9px] text-gray-500 uppercase font-bold">Speed</div>
+                    <div class="text-[9px] text-gray-500 uppercase font-bold">Швидкість</div>
                     <input type="text" id="char-speed" oninput="update('speed')" class="w-full text-center text-2xl font-fantasy bg-transparent border-none">
                 </div>
             </div>
 
             <div class="stat-card p-5 overflow-hidden relative">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-bold uppercase gold-text">Hit Points</span>
+                    <span class="text-sm font-bold uppercase gold-text">Здоров'я</span>
                     <span class="text-lg font-fantasy"><span id="cur-hp" class="text-green-500">0</span> <span class="text-gray-600">/</span> <input type="number" id="char-maxHP" oninput="update('maxHP')" class="w-12 text-center bg-transparent"></span>
                 </div>
                 <div class="h-4 bg-black rounded-full border border-gray-800 p-0.5 mb-4">
@@ -158,7 +158,7 @@
                     <button onclick="changeHP(1)" class="flex-1 bg-green-900/20 hover:bg-green-900/40 border border-green-900 text-green-500 rounded font-bold transition text-xs">ЛІКУВАННЯ</button>
                 </div>
                 <div class="mt-6 flex justify-between items-center border-t border-gray-800 pt-4">
-                    <div class="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Death Saves</div>
+                    <div class="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Ряткидки від смерті</div>
                     <div class="flex gap-4">
                         <div class="flex gap-1" id="ds-success">
                             <div class="death-dot success" onclick="tglDS('success',0)"></div><div class="death-dot success" onclick="tglDS('success',1)"></div><div class="death-dot success" onclick="tglDS('success',2)"></div>
@@ -173,7 +173,7 @@
             <div class="stat-card p-4">
                 <h3 class="text-xs font-bold gold-text uppercase mb-4 flex justify-between">Магічні Комірки <i class="fa-solid fa-hat-wizard"></i></h3>
                 <div id="slots-container" class="grid grid-cols-3 gap-3"></div>
-                <button onclick="longRest()" class="w-full mt-6 py-2 bg-gradient-to-r from-gray-900 to-black border border-gray-700 rounded uppercase text-[10px] font-bold gold-text hover:border-gold transition">Long Rest (Повний відпочинок)</button>
+                <button onclick="longRest()" class="w-full mt-6 py-2 bg-gradient-to-r from-gray-900 to-black border border-gray-700 rounded uppercase text-[10px] font-bold gold-text hover:border-gold transition">Повний відпочинок</button>
             </div>
         </section>
 
@@ -196,7 +196,7 @@
                 <div class="bg-black/40 p-3 rounded border border-gray-800 mb-4">
                     <div class="flex gap-2 mb-2">
                         <input type="text" id="sp-n" placeholder="Назва..." class="flex-1 text-[11px]">
-                        <select id="sp-l" class="w-14"><option value="0">C</option><option value="1">L1</option><option value="2">L2</option><option value="3">L3</option></select>
+                        <select id="sp-l" class="w-14"><option value="0">C</option><option value="1">L1</option><option value="2">L2</option><option value="3">L3<option value="4">L4<option value="5">L5<option value="6">L6<option value="7">L7<option value="8">L8<option value="9">L9</select>
                     </div>
                     <textarea id="sp-d" placeholder="Опис ефекту..." class="w-full h-12 text-[10px] p-2 mb-2"></textarea>
                     <button onclick="addSpell()" class="w-full bg-purple-900/50 hover:bg-purple-800 border border-purple-500 text-white py-1 text-[10px] rounded transition">Вивчити заклинання</button>
@@ -415,5 +415,6 @@
     </script>
 </body>
 </html>
+
 
 
