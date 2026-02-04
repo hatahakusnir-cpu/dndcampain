@@ -346,15 +346,41 @@
             const d = document.getElementById('sp-d').value;
             if(n) { chars[idx].spells.push({name:n, lvl:l, desc:d}); document.getElementById('sp-n').value=''; document.getElementById('sp-d').value=''; renderSpells(); save(); }
         }
+        
         function renderSpells() {
-            document.getElementById('spell-list').innerHTML = chars[idx].spells.map((s, i) => `
-                <div class="bg-black/20 p-2 border-b border-purple-900/10 hover:bg-purple-900/5">
-                    <div class="flex justify-between items-center text-[11px] cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                        <span><b class="text-purple-500 mr-2">${s.lvl==0?'C':'L'+s.lvl}</b> ${s.name}</span>
-                        <button onclick="event.stopPropagation(); chars[idx].spells.splice(${i},1); renderSpells(); save()" class="text-gray-700">✕</button>
-                    </div>
-                    <div class="hidden text-[10px] text-gray-400 mt-2 p-2 bg-black/40 rounded border border-purple-900/20">${s.desc}</div>
-                </div>`).join('');
+    const list = document.getElementById('spell-list');
+    
+    // Сортуємо копію масиву за рівнем (0, 1, 2...)
+    const sortedSpells = [...chars[idx].spells].sort((a, b) => a.lvl - b.lvl);
+    
+    let html = '';
+    let lastLvl = -1;
+
+    sortedSpells.forEach((s) => {
+        // Додаємо заголовок рівня, якщо він змінився
+        if (s.lvl !== lastLvl) {
+            const label = s.lvl == 0 ? "Замовляння (Cantrips)" : `Рівень ${s.lvl}`;
+            html += `<div class="text-[9px] font-bold gold-text uppercase tracking-widest mt-4 mb-2 border-b border-purple-900/30 pb-1">${label}</div>`;
+            lastLvl = s.lvl;
+        }
+
+        // Знаходимо оригінальний індекс для видалення
+        const originalIndex = chars[idx].spells.findIndex(os => os === s);
+
+        html += `
+            <div class="bg-black/20 p-2 border-b border-purple-900/10 hover:bg-purple-900/5 transition">
+                <div class="flex justify-between items-center text-[11px] cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                    <span class="hover:text-purple-400 transition font-medium">${s.name}</span>
+                    <button onclick="event.stopPropagation(); chars[idx].spells.splice(${originalIndex},1); renderSpells(); save()" class="text-gray-700 hover:text-red-500 transition">✕</button>
+                </div>
+                <div class="hidden text-[10px] text-gray-400 mt-2 p-2 bg-black/40 rounded border border-purple-900/20 leading-relaxed shadow-inner">
+                    ${s.desc || 'Опис відсутній...'}
+                </div>
+            </div>`;
+    });
+
+    list.innerHTML = html || '<div class="text-gray-600 text-[10px] italic text-center mt-4">Книга заклинань порожня...</div>';
+}
         }
 
         function addIt() {
@@ -415,6 +441,7 @@
     </script>
 </body>
 </html>
+
 
 
 
