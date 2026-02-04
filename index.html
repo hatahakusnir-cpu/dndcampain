@@ -107,6 +107,17 @@
             </div>
             <button onclick="createNewCharacter()" class="btn-gold px-6 py-2 text-xs">Новий Герой</button>
         </div>
+        <div class="flex gap-4 items-center bg-black/40 px-4 py-2 rounded-full border border-gray-800">
+    <button id="cloud-save-btn" onclick="syncToCloud()" title="Зберегти в хмару" class="text-blue-400 hover:text-blue-300 transition">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+    </button>
+    <button id="cloud-load-btn" onclick="loadFromCloud()" title="Завантажити з хмари" class="text-green-400 hover:text-green-300 transition">
+        <i class="fa-solid fa-cloud-arrow-down"></i>
+    </button>
+    
+    <div class="w-[1px] h-4 bg-gray-700 mx-1"></div> <button onclick="exportCharacter()" title="Експорт файлу" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-download"></i></button>
+    <label class="text-gray-400 hover:text-white transition cursor-pointer"><i class="fa-solid fa-upload"></i><input type="file" class="hidden" onchange="importCharacter(event)"></label>
+</div>
     </header>
 
     <main class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -438,5 +449,49 @@
         function createNewCharacter() { chars.push(JSON.parse(JSON.stringify(template))); idx = chars.length - 1; load(); save(); }
         function deleteCurrentCharacter() { if(chars.length > 1 && confirm("Видалити персонажа з літопису?")) { chars.splice(idx, 1); idx = 0; load(); save(); } }
     </script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQbz9JUWNCYN7K7zuObRY-U-0SXKThAak6tGgbnjR_9Q8ryCWxXjeqqRJDblNMAiTj/exec";
+
+// Функція для збереження в Хмару (Таблицю)
+async function syncToCloud() {
+    const btn = document.getElementById('cloud-save-btn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Потрібно для Google Scripts
+            body: JSON.stringify(chars)
+        });
+        alert("Дані збережено в хмару!");
+    } catch (e) {
+        alert("Помилка збереження!");
+    } finally {
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i>';
+    }
+}
+
+// Функція для завантаження з Хмари (Таблиці)
+async function loadFromCloud() {
+    const btn = document.getElementById('cloud-load-btn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const remoteData = await response.json();
+        if (remoteData && remoteData.length > 0) {
+            chars = remoteData;
+            idx = 0;
+            save(); // Зберігаємо локально
+            load(); // Оновлюємо інтерфейс
+            alert("Дані завантажено з хмари!");
+        }
+    } catch (e) {
+        alert("Помилка завантаження! Можливо, хмара порожня.");
+    } finally {
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>';
+    }
+}
+    </script>
 </body>
 </html>
+
