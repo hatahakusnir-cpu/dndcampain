@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Character Sheet 2026</title>
+    <title>D&D Legend Vault 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Spectral:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -12,12 +12,12 @@
         body { background: var(--bg); color: #e0e0e0; font-family: 'Spectral', serif; }
         h1, h2, h3, .font-fantasy { font-family: 'Marcellus', serif; color: var(--gold); }
         .glass-card { background: var(--card); border: 1px solid var(--border); border-top: 2px solid var(--gold); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-        input, textarea, select { background: #111115 !important; border: 1px solid #333 !important; color: white !important; padding: 8px; border-radius: 6px; outline: none; width: 100%; }
+        input, textarea, select { background: #111115 !important; border: 1px solid #333 !important; color: white !important; padding: 8px; border-radius: 6px; outline: none; }
         input:focus { border-color: var(--gold) !important; }
         .stat-box { background: linear-gradient(145deg, #222228, #16161a); border: 1px solid var(--border); text-align: center; border-radius: 10px; padding: 8px; }
         .slot-circle { width: 12px; height: 12px; border: 2px solid var(--gold); border-radius: 50%; cursor: pointer; transition: 0.2s; }
         .slot-circle.filled { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
-        .btn-gold { background: linear-gradient(to bottom, #c5a059, #9c7a3c); color: black; font-weight: bold; padding: 10px; border-radius: 6px; cursor: pointer; border: none; width: 100%; }
+        .btn-gold { background: linear-gradient(to bottom, #c5a059, #9c7a3c); color: black; font-weight: bold; padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; }
         .item-desc { font-size: 0.85rem; color: #aaa; border-left: 2px solid var(--gold); padding: 8px; margin-top: 5px; background: rgba(0,0,0,0.2); }
         .hidden-content { display: none; }
         .show { display: block; animation: fadeIn 0.3s; }
@@ -28,30 +28,26 @@
 
     <header class="max-w-[1400px] mx-auto mb-10 flex flex-wrap justify-between items-center gap-6 glass-card p-6">
         <div class="flex items-center gap-6">
-            <div class="h-14 w-14 bg-gold/10 rounded-full flex items-center justify-center border border-gold/30">
-                <i class="fa-solid fa-scroll text-2xl text-gold"></i>
+            <div class="h-16 w-16 bg-gold/10 rounded-full flex items-center justify-center border border-gold/30">
+                <i class="fa-solid fa-dragon text-3xl text-gold"></i>
             </div>
             <div>
-                <select id="char-select" onchange="switchChar()" class="text-xl font-bold bg-transparent border-none text-gold cursor-pointer w-auto"></select>
+                <select id="char-select" onchange="window.switchChar()" class="text-2xl font-bold bg-transparent border-none text-gold cursor-pointer w-auto"></select>
                 <div class="flex gap-4 mt-1">
-                    <button onclick="newChar()" class="text-[10px] uppercase text-gray-500 hover:text-white">+ Новий герой</button>
-                    <button onclick="deleteChar()" class="text-[10px] uppercase text-red-800 hover:text-red-500">Видалити</button>
+                    <button onclick="window.newChar()" class="text-[10px] uppercase tracking-widest text-gray-500 hover:text-white">+ Новий герой</button>
+                    <button onclick="window.deleteChar()" class="text-[10px] uppercase tracking-widest text-red-800 hover:text-red-500">Видалити</button>
                 </div>
             </div>
         </div>
 
         <div class="flex items-center gap-6 bg-black/40 p-4 rounded-xl border border-white/5">
             <div class="flex flex-col">
-                <label class="text-[10px] uppercase text-gray-500 mb-1">Хмарний Ключ</label>
-                <input type="text" id="cloud-key" class="text-sm w-32 text-center" oninput="localStorage.setItem('dnd_key', this.value)">
+                <label class="text-[10px] uppercase tracking-widest text-gray-500 mb-1 text-center">Cloud ID (Firebase)</label>
+                <input type="text" id="sync-id" class="text-sm w-40 text-center" placeholder="Gimli_2026">
             </div>
-            <div class="flex gap-2">
-                <button onclick="saveToCloud()" title="Зберегти" class="p-3 bg-blue-900/10 text-blue-400 rounded-lg border border-blue-900/30 hover:bg-blue-900/40">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                </button>
-                <button onclick="loadFromCloud()" title="Завантажити" class="p-3 bg-green-900/10 text-green-400 rounded-lg border border-green-900/30 hover:bg-green-900/40">
-                    <i class="fa-solid fa-cloud-arrow-down"></i>
-                </button>
+            <div class="flex gap-3">
+                <button onclick="window.syncToCloud()" class="p-3 bg-blue-900/10 text-blue-400 rounded-lg border border-blue-900/30 hover:bg-blue-900/30">ЗБЕРЕГТИ</button>
+                <button onclick="window.syncFromCloud()" class="p-3 bg-green-900/10 text-green-400 rounded-lg border border-green-900/30 hover:bg-green-900/30">ЗАВАНТАЖИТИ</button>
             </div>
         </div>
     </header>
@@ -59,74 +55,73 @@
     <main class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         <div class="space-y-6">
-            <div class="glass-card p-6 space-y-4">
-                <input type="text" id="name" oninput="upd('name')" class="text-2xl font-bold bg-transparent border-none" placeholder="Ім'я Героя">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="race" oninput="upd('race')" placeholder="Раса" class="text-xs">
-                    <input type="text" id="class" oninput="upd('class')" placeholder="Клас" class="text-xs">
+            <div class="glass-card p-6 space-y-3">
+                <input type="text" id="name" oninput="window.upd('name')" class="text-2xl font-bold w-full bg-transparent border-none" placeholder="Ім'я">
+                <div class="flex gap-2">
+                    <input type="text" id="race" oninput="window.upd('race')" class="w-1/2 text-xs text-gold/80" placeholder="Раса">
+                    <input type="text" id="class" oninput="window.upd('class')" class="w-1/2 text-xs text-gold/80" placeholder="Клас та Рівень">
                 </div>
-                <div class="flex justify-between items-center bg-black/30 p-2 rounded">
-                    <span class="text-[10px] uppercase font-bold text-gray-500">Рівень</span>
-                    <input type="number" id="lvl" oninput="upd('lvl')" class="w-12 text-center text-gold font-bold bg-transparent border-none">
-                    <span class="text-[10px] uppercase font-bold text-gray-500 ml-4">Майстерність</span>
-                    <input type="number" id="prof" oninput="upd('prof')" class="w-12 text-center text-gold font-bold bg-transparent border-none">
+                <div class="pt-2 flex justify-between items-center text-xs">
+                    <span class="text-gray-500 uppercase font-bold">Бонус майстерності</span>
+                    <input type="number" id="prof" oninput="window.upd('prof')" class="w-12 text-center text-gold font-bold">
                 </div>
             </div>
 
             <div id="stats" class="grid grid-cols-2 gap-4"></div>
 
             <div class="glass-card p-6">
-                <h3 class="text-xs font-bold uppercase mb-4 tracking-widest text-center text-gold">Навички</h3>
-                <div id="skills" class="space-y-1 text-xs"></div>
+                <h3 class="text-xs font-bold uppercase mb-4 tracking-widest border-b border-gold/20 pb-2 text-center">Усі 18 Навичок</h3>
+                <div id="skills" class="space-y-1.5 text-[11px]"></div>
             </div>
         </div>
 
         <div class="space-y-6">
             <div class="grid grid-cols-3 gap-4">
-                <div class="stat-box"><p class="text-[9px] text-gray-500 uppercase">КД</p><input type="number" id="ac" oninput="upd('ac')" class="text-2xl font-fantasy w-full text-center bg-transparent"></div>
-                <div class="stat-box"><p class="text-[9px] text-gray-500 uppercase">Ініц</p><input type="number" id="init" oninput="upd('init')" class="text-2xl font-fantasy w-full text-center bg-transparent"></div>
-                <div class="stat-box"><p class="text-[9px] text-gray-500 uppercase">Швид</p><input type="text" id="spd" oninput="upd('spd')" class="text-xl font-fantasy w-full text-center bg-transparent"></div>
+                <div class="stat-box"><p class="text-[9px] text-gray-500 font-bold uppercase">КД</p><input type="number" id="ac" oninput="window.upd('ac')" class="text-2xl font-fantasy w-full text-center bg-transparent"></div>
+                <div class="stat-box"><p class="text-[9px] text-gray-500 font-bold uppercase">Ініц</p><input type="number" id="init" oninput="window.upd('init')" class="text-2xl font-fantasy w-full text-center bg-transparent"></div>
+                <div class="stat-box"><p class="text-[9px] text-gray-500 font-bold uppercase">Швид</p><input type="text" id="spd" oninput="window.upd('spd')" class="text-xl font-fantasy w-full text-center bg-transparent"></div>
             </div>
 
             <div class="glass-card p-6 border-t-green-700">
-                <div class="flex justify-between items-end mb-2">
-                    <h3 class="text-xs font-bold uppercase">HP</h3>
-                    <div class="text-2xl font-fantasy text-green-500"><span id="cur-hp">0</span> / <input type="number" id="max-hp" oninput="upd('max-hp')" class="w-16 bg-transparent text-center"></div>
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-xs font-bold uppercase">Здоров'я (HP)</h3>
+                    <div class="text-2xl font-fantasy text-green-500"><span id="cur-hp">0</span> / <input type="number" id="max-hp" oninput="window.upd('max-hp')" class="w-16 bg-transparent text-center"></div>
                 </div>
                 <div class="h-3 bg-black rounded-full overflow-hidden mb-4"><div id="hp-bar" class="h-full bg-green-600 transition-all duration-500"></div></div>
                 <div class="flex gap-2">
-                    <input type="number" id="hp-amt" placeholder="Скільки..." class="text-center">
-                    <button onclick="modHP(-1)" class="w-12 bg-red-900/20 text-red-500 rounded font-bold border border-red-900/30">-</button>
-                    <button onclick="modHP(1)" class="w-12 bg-green-900/20 text-green-500 rounded font-bold border border-green-900/30">+</button>
+                    <input type="number" id="hp-amt" placeholder="Сума" class="w-full text-center">
+                    <button onclick="window.modHP(-1)" class="w-12 bg-red-900/20 text-red-500 rounded font-bold border border-red-900/30">-</button>
+                    <button onclick="window.modHP(1)" class="w-12 bg-green-900/20 text-green-500 rounded font-bold border border-green-900/30">+</button>
                 </div>
             </div>
 
             <div class="glass-card p-6">
-                <h3 class="text-xs font-bold uppercase mb-4 text-center">Комірки Магії</h3>
+                <h3 class="text-xs font-bold uppercase mb-4 text-center tracking-widest">Магічні комірки (1-9)</h3>
                 <div id="slots" class="space-y-3"></div>
-                <button onclick="longRest()" class="mt-6 w-full text-[10px] uppercase font-bold text-gold border border-gold/30 py-2 rounded hover:bg-gold/10">Довгий відпочинок</button>
+                <button onclick="window.longRest()" class="mt-6 w-full text-[10px] uppercase font-bold text-gold border border-gold/30 py-2 rounded hover:bg-gold/10">Довгий відпочинок</button>
             </div>
         </div>
 
         <div class="space-y-6">
             <div class="glass-card p-6 border-t-red-900">
-                <h3 class="text-xs font-bold mb-4 uppercase">Зброя та Атаки</h3>
+                <h3 class="text-xs font-bold mb-4 uppercase flex justify-between">Арсенал <i class="fa-solid fa-sword"></i></h3>
                 <div id="weapon-list" class="space-y-2 mb-4"></div>
                 <div class="space-y-2 bg-black/20 p-3 rounded">
-                    <div class="flex gap-2"><input type="text" id="wp-n" placeholder="Назва" class="text-xs"><input type="text" id="wp-a" placeholder="Шкода" class="w-24 text-xs"></div>
-                    <textarea id="wp-d" placeholder="Властивості..." class="text-xs h-12"></textarea>
-                    <button onclick="addWeapon()" class="btn-gold text-xs">Додати</button>
+                    <input type="text" id="wp-n" placeholder="Назва зброї" class="text-xs">
+                    <input type="text" id="wp-a" placeholder="+Атака / Шкода" class="text-xs">
+                    <textarea id="wp-d" placeholder="Властивості..." class="text-xs h-12 w-full"></textarea>
+                    <button onclick="window.addWeapon()" class="btn-gold text-xs w-full">Додати</button>
                 </div>
             </div>
 
             <div class="glass-card p-6 border-t-purple-900">
-                <h3 class="text-xs font-bold mb-4 uppercase">Книга Заклинань</h3>
-                <div id="spell-list" class="space-y-2 mb-4 max-h-[300px] overflow-y-auto"></div>
+                <h3 class="text-xs font-bold mb-4 uppercase">Книга заклинань</h3>
+                <div id="spell-list" class="space-y-2 mb-4 max-h-[300px] overflow-y-auto pr-1"></div>
                 <div class="space-y-2 bg-black/20 p-3 rounded">
                     <div class="flex gap-2">
-                        <input type="text" id="sp-n" placeholder="Назва" class="text-xs">
-                        <select id="sp-l" class="text-xs w-28">
-                            <option value="0">Змова (0)</option>
+                        <input type="text" id="sp-n" placeholder="Назва" class="text-xs w-full">
+                        <select id="sp-l" class="text-xs w-32">
+                            <option value="0">Змова</option>
                             <option value="1">1 Рівень</option>
                             <option value="2">2 Рівень</option>
                             <option value="3">3 Рівень</option>
@@ -138,61 +133,63 @@
                             <option value="9">9 Рівень</option>
                         </select>
                     </div>
-                    <textarea id="sp-d" placeholder="Ефект..." class="text-xs h-12"></textarea>
-                    <button onclick="addSpell()" class="btn-gold text-xs" style="filter: hue-rotate(240deg)">Вивчити</button>
+                    <textarea id="sp-d" placeholder="Ефект..." class="text-xs h-12 w-full"></textarea>
+                    <button onclick="window.addSpell()" class="btn-gold text-xs w-full" style="background: #6b21a8; color: white;">Вивчити</button>
                 </div>
             </div>
         </div>
 
         <div class="space-y-6">
             <div class="glass-card p-6">
-                <h3 class="text-xs font-bold uppercase mb-4">Рюкзак</h3>
-                <div id="inv-list" class="space-y-1 mb-4"></div>
+                <h3 class="text-xs font-bold uppercase mb-4">Інвентар</h3>
+                <div id="inv-list" class="space-y-2 mb-4"></div>
                 <div class="space-y-2">
-                    <input type="text" id="it-n" placeholder="Предмет" class="text-xs">
-                    <textarea id="it-d" placeholder="Опис..." class="text-xs h-12"></textarea>
-                    <button onclick="addItem()" class="bg-gray-800 text-white w-full py-2 rounded text-xs">Додати</button>
+                    <input type="text" id="it-n" placeholder="Предмет" class="text-xs w-full">
+                    <textarea id="it-d" placeholder="Опис..." class="text-xs h-12 w-full"></textarea>
+                    <button onclick="window.addItem()" class="bg-gray-800 text-gray-300 w-full py-2 rounded text-xs">Додати</button>
                 </div>
             </div>
 
-            <div class="glass-card p-6 min-h-[300px] flex flex-col">
-                <h3 class="text-xs font-bold uppercase mb-2">Блокнот</h3>
-                <textarea id="notes" oninput="upd('notes')" class="flex-1 bg-black/20 p-3 rounded text-sm text-gray-400 italic resize-none" placeholder="Квести, імена, плани..."></textarea>
+            <div class="glass-card p-6 min-h-[400px] flex flex-col border-t-blue-900">
+                <h3 class="text-xs font-bold uppercase mb-4 flex justify-between">Блокнот <i class="fa-solid fa-feather-pointed"></i></h3>
+                <textarea id="notes" oninput="window.upd('notes')" class="flex-1 bg-black/30 p-3 rounded text-sm text-gray-400 italic resize-none border border-white/5" placeholder="Квести, таємниці, імена..."></textarea>
             </div>
         </div>
     </main>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4wuN1ky52dE_m-_6uvbiSpfDO6_LY-fIrY8Zw0780RrU1rhslNGjx6izA3YgsflDD8g/exec";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // !!! ВСТАВ СВОЇ КЛЮЧІ FIREBASE ТУТ !!!
+        const firebaseConfig = {
+  apiKey: "AIzaSyA1R-GhTA8rsQvvO-zGWdI0UAvsqHiUJcU",
+  authDomain: "dnddatabase-27d3c.firebaseapp.com",
+  projectId: "dnddatabase-27d3c",
+  storageBucket: "dnddatabase-27d3c.firebasestorage.app",
+  messagingSenderId: "200380949962",
+  appId: "1:200380949962:web:660ba4eff3d96027099b33",
+  measurementId: "G-XCTC0CSGJV"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- ДАНІ ТА ШАБЛОН ---
         const skillNames = ["Атлетика (СИЛ)", "Акробатика (СПР)", "Скритність (СПР)", "Ловкість рук (СПР)", "Аналіз (ІНТ)", "Історія (ІНТ)", "Магія (ІНТ)", "Природа (ІНТ)", "Релігія (ІНТ)", "Уважність (МУД)", "Виживання (МУД)", "Медицина (МУД)", "Прозорливість (МУД)", "Тварини (МУД)", "Виступ (ХАР)", "Залякування (ХАР)", "Обман (ХАР)", "Переконання (ХАР)"];
         const slotCounts = [4, 3, 3, 3, 3, 2, 2, 1, 1];
-        
-        const template = {
-            name: "Новий Герой", race: "", class: "", lvl: 1, prof: 2,
-            stats: { "СИЛ": 10, "СПР": 10, "ТІЛ": 10, "ІНТ": 10, "МУД": 10, "ХАР": 10 },
-            ac: 10, init: 0, spd: "30 фт", curHP: 10, maxHP: 10,
-            weapons: [], spells: [], inventory: [], notes: "",
-            slots: [0,0,0,0,0,0,0,0,0]
-        };
+        const template = { name: "Новий Герой", race: "", class: "", prof: 2, stats: { "СИЛ": 10, "СПР": 10, "ТІЛ": 10, "ІНТ": 10, "МУД": 10, "ХАР": 10 }, ac: 10, init: 0, spd: "30 фт", curHP: 10, maxHP: 10, weapons: [], spells: [], inventory: [], notes: "", slots: [0,0,0,0,0,0,0,0,0] };
 
-        let chars = JSON.parse(localStorage.getItem('dnd_final_v1')) || [{...template}];
-        let idx = parseInt(localStorage.getItem('dnd_final_idx')) || 0;
+        let chars = JSON.parse(localStorage.getItem('dnd_firebase_v1')) || [{...template}];
+        let idx = parseInt(localStorage.getItem('dnd_fb_idx')) || 0;
 
-        window.onload = () => {
-            document.getElementById('cloud-key').value = localStorage.getItem('dnd_key') || '';
-            renderAll();
-        };
-
-        function save() { localStorage.setItem('dnd_final_v1', JSON.stringify(chars)); localStorage.setItem('dnd_final_idx', idx); }
-
-        function upd(field) {
+        // ПРИВ'ЯЗКА ФУНКЦІЙ ДО WINDOW (ЩОБ ПРАЦЮВАЛИ ONCLICK)
+        window.upd = (field) => {
             const c = chars[idx];
             if (field === 'name') c.name = document.getElementById('name').value;
             if (field === 'race') c.race = document.getElementById('race').value;
             if (field === 'class') c.class = document.getElementById('class').value;
-            if (field === 'lvl') c.lvl = parseInt(document.getElementById('lvl').value) || 1;
-            if (field === 'prof') c.prof = parseInt(document.getElementById('prof').value) || 2;
+            if (field === 'prof') c.prof = parseInt(document.getElementById('prof').value) || 0;
             if (field === 'ac') c.ac = parseInt(document.getElementById('ac').value) || 0;
             if (field === 'init') c.init = parseInt(document.getElementById('init').value) || 0;
             if (field === 'spd') c.spd = document.getElementById('spd').value;
@@ -201,116 +198,131 @@
             save();
             if (field === 'name') renderSelector();
             renderSkills();
-        }
+        };
 
-        function renderAll() {
-            const c = chars[idx]; if(!c) return;
+        const save = () => { localStorage.setItem('dnd_firebase_v1', JSON.stringify(chars)); localStorage.setItem('dnd_fb_idx', idx); };
+
+        window.updStat = (k, v) => { chars[idx].stats[k] = parseInt(v) || 0; renderStats(); renderSkills(); save(); };
+
+        const renderStats = () => {
+            document.getElementById('stats').innerHTML = Object.entries(chars[idx].stats).map(([k, v]) => {
+                const mod = Math.floor((v - 10) / 2);
+                return `<div class="stat-box"><p class="text-[9px] text-gray-500 uppercase">${k}</p><input type="number" value="${v}" oninput="window.updStat('${k}', this.value)" class="w-full text-center text-xl font-bold bg-transparent border-none"><p class="text-xs text-gold">${mod >= 0 ? '+' : ''}${mod}</p></div>`;
+            }).join('');
+        };
+
+        const renderSkills = () => {
+            document.getElementById('skills').innerHTML = skillNames.map(s => {
+                const key = s.match(/\((.*?)\)/)[1];
+                const mod = Math.floor((chars[idx].stats[key]-10)/2);
+                return `<div class="flex justify-between border-b border-white/5 py-1 px-1"><span>${s}</span><span class="text-gold font-bold">${mod >= 0 ? '+' : ''}${mod}</span></div>`;
+            }).join('');
+        };
+
+        const renderHP = () => {
+            const c = chars[idx]; document.getElementById('hp-bar').style.width = ((c.curHP / (c.maxHP || 1)) * 100) + '%';
+            document.getElementById('cur-hp').innerText = c.curHP;
+        };
+
+        window.modHP = (m) => {
+            const val = parseInt(document.getElementById('hp-amt').value) || 0;
+            chars[idx].curHP = m > 0 ? Math.min(chars[idx].maxHP, chars[idx].curHP + val) : Math.max(0, chars[idx].curHP - val);
+            document.getElementById('hp-amt').value = ''; renderHP(); save();
+        };
+
+        const renderSlots = () => {
+            document.getElementById('slots').innerHTML = slotCounts.map((m, l) => `
+                <div class="flex justify-between items-center bg-black/20 p-2 rounded">
+                    <span class="text-[10px] text-gray-500 uppercase">Рівень ${l+1}</span>
+                    <div class="flex gap-1.5">${Array.from({length: m}, (_, i) => `<div onclick="window.tglSlot(${l}, ${i})" class="slot-circle ${i < chars[idx].slots[l] ? 'filled' : ''}"></div>`).join('')}</div>
+                </div>`).join('');
+        };
+        window.tglSlot = (l, i) => { chars[idx].slots[l] = (chars[idx].slots[l] === i + 1) ? i : i + 1; renderSlots(); save(); };
+
+        window.addWeapon = () => {
+            const n = document.getElementById('wp-n').value, a = document.getElementById('wp-a').value, d = document.getElementById('wp-d').value;
+            if(n) { chars[idx].weapons.push({n, a, d}); renderWeapons(); save(); document.getElementById('wp-n').value=''; document.getElementById('wp-a').value=''; document.getElementById('wp-d').value=''; }
+        };
+        const renderWeapons = () => {
+            document.getElementById('weapon-list').innerHTML = chars[idx].weapons.map((w, i) => `
+                <div class="bg-black/40 p-2 rounded border border-white/5">
+                    <div class="flex justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('show')">
+                        <span class="text-xs font-bold text-red-500">${w.a} <span class="text-gray-200 ml-2 font-normal">${w.n}</span></span>
+                        <button onclick="chars[idx].weapons.splice(${i},1); window.renderWeapons();" class="text-gray-700">✕</button>
+                    </div><div class="hidden-content item-desc">${w.d || 'Без опису'}</div>
+                </div>`).join('');
+        };
+
+        window.addSpell = () => {
+            const n = document.getElementById('sp-n').value, l = document.getElementById('sp-l').value, d = document.getElementById('sp-d').value;
+            if(n) { chars[idx].spells.push({n, l: parseInt(l), d}); renderSpells(); save(); document.getElementById('sp-n').value=''; document.getElementById('sp-d').value=''; }
+        };
+        const renderSpells = () => {
+            const sorted = [...chars[idx].spells].sort((a,b)=>a.l-b.l);
+            document.getElementById('spell-list').innerHTML = sorted.map((s, i) => `
+                <div class="bg-black/40 p-2 rounded border border-white/5">
+                    <div class="flex justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('show')">
+                        <span class="text-[10px] text-purple-400 font-bold">${s.l==0?'Змова':'Рівень '+s.l} <span class="text-gray-200 ml-1 font-normal text-xs">${s.n}</span></span>
+                        <button onclick="chars[idx].spells.splice(${chars[idx].spells.indexOf(s)},1); window.renderSpells();" class="text-gray-700">✕</button>
+                    </div><div class="hidden-content item-desc">${s.d || 'Без опису'}</div>
+                </div>`).join('');
+        };
+
+        window.addItem = () => {
+            const n = document.getElementById('it-n').value, d = document.getElementById('it-d').value;
+            if(n) { chars[idx].inventory.push({n, d}); renderInv(); save(); document.getElementById('it-n').value=''; document.getElementById('it-d').value=''; }
+        };
+        const renderInv = () => {
+            document.getElementById('inv-list').innerHTML = chars[idx].inventory.map((it, i) => `
+                <div class="bg-black/40 p-2 rounded border border-white/5">
+                    <div class="flex justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('show')"><span class="text-xs text-gold/80">${it.n}</span><button onclick="chars[idx].inventory.splice(${i},1); window.renderInv();" class="text-gray-700">✕</button></div>
+                    <div class="hidden-content item-desc">${it.d || 'Без опису'}</div>
+                </div>`).join('');
+        };
+
+        const renderSelector = () => { document.getElementById('char-select').innerHTML = chars.map((c, i) => `<option value="${i}" ${i==idx?'selected':''}>${c.name}</option>`).join(''); };
+        window.switchChar = () => { idx = parseInt(document.getElementById('char-select').value); renderAll(); save(); };
+        window.newChar = () => { chars.push(JSON.parse(JSON.stringify(template))); idx = chars.length - 1; renderAll(); save(); };
+        window.deleteChar = () => { if(chars.length > 1 && confirm("Видалити?")) { chars.splice(idx, 1); idx = 0; renderAll(); save(); } };
+        window.longRest = () => { chars[idx].curHP = chars[idx].maxHP; chars[idx].slots = [0,0,0,0,0,0,0,0,0]; renderHP(); renderSlots(); save(); alert("Відпочинок завершено!"); };
+
+        const renderAll = () => {
+            const c = chars[idx];
             document.getElementById('name').value = c.name;
             document.getElementById('race').value = c.race || "";
             document.getElementById('class').value = c.class || "";
-            document.getElementById('lvl').value = c.lvl || 1;
-            document.getElementById('prof').value = c.prof || 2;
+            document.getElementById('prof').value = c.prof;
             document.getElementById('ac').value = c.ac;
             document.getElementById('init').value = c.init;
             document.getElementById('spd').value = c.spd;
             document.getElementById('max-hp').value = c.maxHP;
             document.getElementById('notes').value = c.notes || "";
             renderStats(); renderSkills(); renderHP(); renderSlots(); renderWeapons(); renderSpells(); renderInv(); renderSelector();
-        }
+        };
 
-        function renderStats() {
-            document.getElementById('stats').innerHTML = Object.entries(chars[idx].stats).map(([k, v]) => {
-                const mod = Math.floor((v - 10) / 2);
-                return `<div class="stat-box"><p class="text-[9px] text-gray-500 uppercase">${k}</p><input type="number" value="${v}" oninput="updStat('${k}', this.value)" class="w-full text-center text-xl font-bold bg-transparent border-none"><p class="text-xs text-gold">${mod >= 0 ? '+' : ''}${mod}</p></div>`;
-            }).join('');
-        }
-        function updStat(k, v) { chars[idx].stats[k] = parseInt(v) || 0; renderStats(); renderSkills(); save(); }
+        // FIREBASE SYNC
+        window.syncToCloud = async () => {
+            const id = document.getElementById('sync-id').value;
+            if(!id) return alert("Введи ID героя!");
+            try {
+                await setDoc(doc(db, "characters", id), chars[idx]);
+                alert("Збережено в Firebase!");
+            } catch(e) { alert("Помилка прав доступу. Перевір правила Firestore (Test Mode)!"); }
+        };
 
-        function renderSkills() {
-            document.getElementById('skills').innerHTML = skillNames.map(s => {
-                const key = s.match(/\((.*?)\)/)[1];
-                const mod = Math.floor((chars[idx].stats[key]-10)/2);
-                return `<div class="flex justify-between border-b border-white/5 py-1"><span>${s}</span><span class="text-gold font-bold">${mod >= 0 ? '+' : ''}${mod}</span></div>`;
-            }).join('');
-        }
+        window.syncFromCloud = async () => {
+            const id = document.getElementById('sync-id').value;
+            if(!id) return alert("Введи ID героя!");
+            try {
+                const docSnap = await getDoc(doc(db, "characters", id));
+                if (docSnap.exists()) {
+                    chars[idx] = docSnap.data();
+                    renderAll(); save(); alert("Дані отримано!");
+                } else { alert("ID не знайдено."); }
+            } catch(e) { alert("Помилка завантаження."); }
+        };
 
-        function renderHP() {
-            const c = chars[idx]; document.getElementById('hp-bar').style.width = ((c.curHP / (c.maxHP || 1)) * 100) + '%';
-            document.getElementById('cur-hp').innerText = c.curHP;
-        }
-        function modHP(m) {
-            const val = parseInt(document.getElementById('hp-amt').value) || 0;
-            chars[idx].curHP = m > 0 ? Math.min(chars[idx].maxHP, chars[idx].curHP + val) : Math.max(0, chars[idx].curHP - val);
-            document.getElementById('hp-amt').value = ''; renderHP(); save();
-        }
-
-        function renderSlots() {
-            document.getElementById('slots').innerHTML = slotCounts.map((m, l) => `
-                <div class="flex justify-between items-center bg-black/20 p-2 rounded">
-                    <span class="text-[10px] text-gray-500">Круг ${l+1}</span>
-                    <div class="flex gap-1.5">${Array.from({length: m}, (_, i) => `<div onclick="tglSlot(${l}, ${i})" class="slot-circle ${i < chars[idx].slots[l] ? 'filled' : ''}"></div>`).join('')}</div>
-                </div>`).join('');
-        }
-        function tglSlot(l, i) { chars[idx].slots[l] = (chars[idx].slots[l] === i + 1) ? i : i + 1; renderSlots(); save(); }
-
-        function addWeapon() {
-            const n = document.getElementById('wp-n').value, a = document.getElementById('wp-a').value, d = document.getElementById('wp-d').value;
-            if(n) { chars[idx].weapons.push({n, a, d}); renderWeapons(); save(); }
-        }
-        function renderWeapons() {
-            document.getElementById('weapon-list').innerHTML = chars[idx].weapons.map((w, i) => `
-                <div class="bg-black/40 p-2 rounded border border-white/5">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('show')">
-                        <span class="text-xs font-bold text-red-500">${w.a} <span class="text-gray-200 ml-2">${w.n}</span></span>
-                        <button onclick="chars[idx].weapons.splice(${i},1); renderWeapons(); save()" class="text-gray-700">✕</button>
-                    </div><div class="hidden-content item-desc">${w.d || 'Без опису'}</div>
-                </div>`).join('');
-        }
-
-        function addSpell() {
-            const n = document.getElementById('sp-n').value, l = document.getElementById('sp-l').value, d = document.getElementById('sp-d').value;
-            if(n) { chars[idx].spells.push({n, l: parseInt(l), d}); renderSpells(); save(); }
-        }
-        function renderSpells() {
-            const sorted = [...chars[idx].spells].sort((a,b)=>a.l-b.l);
-            document.getElementById('spell-list').innerHTML = sorted.map((s, i) => `
-                <div class="bg-black/40 p-2 rounded border border-white/5">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('show')">
-                        <span class="text-[10px] text-purple-400 font-bold">${s.l==0?'Змова':'Рівень '+s.l} <span class="text-gray-200 ml-1 text-xs font-normal">${s.n}</span></span>
-                        <button onclick="chars[idx].spells.splice(${chars[idx].spells.indexOf(s)},1); renderSpells(); save()" class="text-gray-700">✕</button>
-                    </div><div class="hidden-content item-desc">${s.d || 'Без опису'}</div>
-                </div>`).join('');
-        }
-
-        function addItem() {
-            const n = document.getElementById('it-n').value, d = document.getElementById('it-d').value;
-            if(n) { chars[idx].inventory.push({n, d}); renderInv(); save(); }
-        }
-        function renderInv() {
-            document.getElementById('inv-list').innerHTML = chars[idx].inventory.map((it, i) => `
-                <div class="bg-black/40 p-2 rounded border border-white/5">
-                    <div class="flex justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('show')"><span class="text-xs text-gold/80">${it.n}</span><button onclick="chars[idx].inventory.splice(${i},1); renderInv(); save()" class="text-gray-700">✕</button></div>
-                    <div class="hidden-content item-desc">${it.d || 'Без опису'}</div>
-                </div>`).join('');
-        }
-
-        function renderSelector() { document.getElementById('char-select').innerHTML = chars.map((c, i) => `<option value="${i}" ${i==idx?'selected':''}>${c.name}</option>`).join(''); }
-        function switchChar() { idx = parseInt(document.getElementById('char-select').value); renderAll(); save(); }
-        function newChar() { chars.push(JSON.parse(JSON.stringify(template))); idx = chars.length - 1; renderAll(); save(); }
-        function deleteChar() { if(chars.length > 1 && confirm("Видалити?")) { chars.splice(idx, 1); idx = 0; renderAll(); save(); } }
-        function longRest() { chars[idx].curHP = chars[idx].maxHP; chars[idx].slots = [0,0,0,0,0,0,0,0,0]; renderHP(); renderSlots(); save(); alert("Відпочинок завершено!"); }
-
-        async function saveToCloud() {
-            const key = document.getElementById('cloud-key').value; if(!key) return alert("Введи ключ!");
-            try { await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({key, chars}) }); alert("Збережено!"); } catch(e) { alert("Помилка."); }
-        }
-
-        function loadFromCloud() {
-            const key = document.getElementById('cloud-key').value; if(!key) return alert("Введи ключ!");
-            const cb = 'dnd_' + Date.now();
-            window[cb] = (data) => { if(data && data.length) { chars = data; idx = 0; save(); renderAll(); alert("Успішно завантажено!"); } delete window[cb]; document.getElementById('j-l').remove(); };
-            const s = document.createElement('script'); s.id = 'j-l'; s.src = `${SCRIPT_URL}?key=${encodeURIComponent(key)}&callback=${cb}`; document.body.appendChild(s);
-        }
+        renderAll();
     </script>
 </body>
 </html>
