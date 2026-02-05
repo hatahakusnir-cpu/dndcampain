@@ -140,7 +140,7 @@
 
     <script>
         // ВАЖЛИВО: ВСТАВ СВОЄ ПОСИЛАННЯ EXEC ТУТ
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyM7I3QMdin3HZTne0GM-YfC3f72ztlxidrMMVmRaTeBBlGpXPX7XNwjlfWr0jodOGn-g/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmtbA6HAaL2qbuleKDKSEsqSmqIEOORYtBxwB_Cn3im9YNDAfXHUJveYQ7yap03r6enQ/exec";
 
         const skillList = ["Атлетика (STR)", "Акробатика (DEX)", "Скритність (DEX)", "Ловкість рук (DEX)", "Аналіз (INT)", "Історія (INT)", "Магія (INT)", "Природа (INT)", "Релігія (INT)", "Уважність (WIS)", "Виживання (WIS)", "Медицина (WIS)", "Прозорливість (WIS)", "Тварини (WIS)", "Виступ (CHA)", "Залякування (CHA)", "Обман (CHA)", "Переконання (CHA)"];
         const maxSlots = [4, 3, 3, 3, 3, 2, 2, 1, 1]; 
@@ -178,33 +178,74 @@
             finally { btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i>'; }
         }
 
-        function loadFromCloud() {
-            const key = document.getElementById('cloud-key').value;
-            if (!key) return alert("Введи ключ для пошуку!");
-            const btn = document.getElementById('cloud-load-btn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      // Змінна для посилання (встав своє)
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmtbA6HAaL2qbuleKDKSEsqSmqIEOORYtBxwB_Cn3im9YNDAfXHUJveYQ7yap03r6enQ/exec";
 
-            const cbName = 'dnd_cb_' + Date.now();
-            const timeout = setTimeout(() => { cleanup(); alert("Запит занадто довгий. Перевір посилання."); }, 7000);
+// ЗБЕРЕЖЕННЯ
+async function syncToCloud() {
+    const key = document.getElementById('cloud-key').value;
+    if (!key) return alert("Введи Cloud Key!");
+    
+    const btn = document.getElementById('cloud-save-btn');
+    btn.style.opacity = "0.5";
+    
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ key: key, chars: chars })
+        });
+        alert("Дані відправлено в хмару!");
+    } catch (e) {
+        alert("Помилка при збереженні.");
+    } finally {
+        btn.style.opacity = "1";
+    }
+}
 
-            window[cbName] = function(data) {
-                clearTimeout(timeout);
-                if (data && Array.isArray(data) && data.length > 0) {
-                    chars = data; idx = 0; save(); load();
-                    alert("Синхронізовано!");
-                } else { alert("За цим ключем нічого не знайдено."); }
-                cleanup();
-            };
+// ЗАВАНТАЖЕННЯ
+function loadFromCloud() {
+    const key = document.getElementById('cloud-key').value;
+    if (!key) return alert("Введи ключ!");
+    
+    const btn = document.getElementById('cloud-load-btn');
+    btn.style.opacity = "0.5";
 
-            const cleanup = () => { delete window[cbName]; if(document.getElementById('jsonp')) document.getElementById('jsonp').remove(); btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>'; };
-            
-            const script = document.createElement('script');
-            script.id = 'jsonp';
-            script.src = GOOGLE_SCRIPT_URL + "?key=" + encodeURIComponent(key) + "&callback=" + cbName + "&v=" + Date.now();
-            script.onerror = () => { clearTimeout(timeout); cleanup(); alert("Збій скрипта Google."); };
-            document.body.appendChild(script);
+    const cbName = 'dnd_callback_' + Date.now();
+    
+    // Створюємо тимчасову функцію для отримання даних
+    window[cbName] = function(data) {
+        if (data && Array.isArray(data) && data.length > 0) {
+            chars = data;
+            idx = 0;
+            save(); // Зберігаємо в локальну пам'ять
+            load(); // Оновлюємо інтерфейс
+            alert("Герої завантажені успішно!");
+        } else {
+            alert("Нічого не знайдено за цим ключем.");
         }
+        cleanup();
+    };
 
+    function cleanup() {
+        delete window[cbName];
+        const script = document.getElementById('jsonp-loader');
+        if (script) script.remove();
+        btn.style.opacity = "1";
+    }
+
+    // Створюємо запит через тег <script>
+    const script = document.createElement('script');
+    script.id = 'jsonp-loader';
+    script.src = `${GOOGLE_SCRIPT_URL}?key=${encodeURIComponent(key)}&callback=${cbName}&v=${Date.now()}`;
+    
+    script.onerror = () => {
+        alert("Помилка мережі або невірне посилання.");
+        cleanup();
+    };
+
+    document.body.appendChild(script);
+}
         function load() {
             if (!chars[idx]) idx = 0;
             const c = chars[idx];
@@ -340,3 +381,4 @@
     </script>
 </body>
 </html>
+
