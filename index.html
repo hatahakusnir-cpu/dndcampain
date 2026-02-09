@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Legend Vault 2026</title>
+    <title>D&D Character Sheet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Spectral:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -70,7 +70,7 @@
             <div id="stats" class="grid grid-cols-2 gap-4"></div>
 
             <div class="glass-card p-6">
-                <h3 class="text-xs font-bold uppercase mb-4 tracking-widest border-b border-gold/20 pb-2 text-center">Усі 18 Навичок</h3>
+                <h3 class="text-xs font-bold uppercase mb-4 tracking-widest border-b border-gold/20 pb-2 text-center">Навички</h3>
                 <div id="skills" class="space-y-1.5 text-[11px]"></div>
             </div>
         </div>
@@ -84,7 +84,7 @@
 
             <div class="glass-card p-6 border-t-green-700">
                 <div class="flex justify-between items-end mb-4">
-                    <h3 class="text-xs font-bold uppercase">Здоров'я (HP)</h3>
+                    <h3 class="text-xs font-bold uppercase">Здоров'я </h3>
                     <div class="text-2xl font-fantasy text-green-500"><span id="cur-hp">0</span> / <input type="number" id="max-hp" oninput="window.upd('max-hp')" class="w-16 bg-transparent text-center"></div>
                 </div>
                 <div class="h-3 bg-black rounded-full overflow-hidden mb-4"><div id="hp-bar" class="h-full bg-green-600 transition-all duration-500"></div></div>
@@ -96,7 +96,7 @@
             </div>
 
             <div class="glass-card p-6">
-                <h3 class="text-xs font-bold uppercase mb-4 text-center tracking-widest">Магічні комірки (1-9)</h3>
+                <h3 class="text-xs font-bold uppercase mb-4 text-center tracking-widest">Магічні комірки</h3>
                 <div id="slots" class="space-y-3"></div>
                 <button onclick="window.longRest()" class="mt-6 w-full text-[10px] uppercase font-bold text-gold border border-gold/30 py-2 rounded hover:bg-gold/10">Довгий відпочинок</button>
             </div>
@@ -138,6 +138,23 @@
                 </div>
             </div>
         </div>
+         <div class="glass-card p-6 border-t-purple-900">
+                <h3 class="text-xs font-bold mb-4 uppercase">Риси та навички</h3>
+                <div id="spell-list" class="space-y-2 mb-4 max-h-[300px] overflow-y-auto pr-1"></div>
+                <div class="space-y-2 bg-black/20 p-3 rounded">
+                    <div class="flex gap-2">
+                        <input type="text" id="sp-n" placeholder="Назва" class="text-xs w-full">
+                        <select id="sp-l" class="text-xs w-32">
+                            <option value="0">Риса</option>
+                            <option value="1">Навичка</option>
+                        </select>
+                    </div>
+                    <textarea id="sp-d" placeholder="Ефект..." class="text-xs h-12 w-full"></textarea>
+                    <button onclick="window.addSpell()" class="btn-gold text-xs w-full" style="background: #6b21a8; color: white;">Додати</button>
+                </div>
+            </div>
+        </div>
+
 
         <div class="space-y-6">
             <div class="glass-card p-6">
@@ -326,3 +343,4 @@
     </script>
 </body>
 </html>
+
