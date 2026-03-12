@@ -173,202 +173,240 @@
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1R-GhTA8rsQvvO-zGWdI0UAvsqHiUJcU",
-            authDomain: "dnddatabase-27d3c.firebaseapp.com",
-            projectId: "dnddatabase-27d3c",
-            storageBucket: "dnddatabase-27d3c.firebasestorage.app",
-            messagingSenderId: "200380949962",
-            appId: "1:200380949962:web:660ba4eff3d96027099b33"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyA1R-GhTA8rsQvvO-zGWdI0UAvsqHiUJcU",
+        authDomain: "dnddatabase-27d3c.firebaseapp.com",
+        projectId: "dnddatabase-27d3c",
+        storageBucket: "dnddatabase-27d3c.firebasestorage.app",
+        messagingSenderId: "200380949962",
+        appId: "1:200380949962:web:660ba4eff3d96027099b33"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        const skillNames = ["Атлетика (СИЛ)", "Акробатика (СПР)", "Скритність (СПР)", "Ловкість рук (СПР)", "Аналіз (ІНТ)", "Історія (ІНТ)", "Магія (ІНТ)", "Природа (ІНТ)", "Релігія (ІНТ)", "Уважність (МУД)", "Виживання (МУД)", "Медицина (МУД)", "Прозорливість (МУД)", "Тварини (МУД)", "Виступ (ХАР)", "Залякування (ХАР)", "Обман (ХАР)", "Переконання (ХАР)"];
-        const slotCounts = [4, 3, 3, 3, 3, 2, 2, 1, 1];
+    const skillNames = ["Атлетика (СИЛ)", "Акробатика (СПР)", "Скритність (СПР)", "Ловкість рук (СПР)", "Аналіз (ІНТ)", "Історія (ІНТ)", "Магія (ІНТ)", "Природа (ІНТ)", "Релігія (ІНТ)", "Уважність (МУД)", "Виживання (МУД)", "Медицина (МУД)", "Прозорливість (МУД)", "Тварини (МУД)", "Виступ (ХАР)", "Залякування (ХАР)", "Обман (ХАР)", "Переконання (ХАР)"];
+    const slotCounts = [4, 3, 3, 3, 3, 2, 2, 1, 1];
+    
+    const template = { 
+        name: "Новий Герой", race: "", class: "", prof: 2, 
+        stats: { "СИЛ": 10, "СПР": 10, "ТІЛ": 10, "ІНТ": 10, "МУД": 10, "ХАР": 10 }, 
+        ac: 10, init: 0, spd: "30 фт", curHP: 10, maxHP: 10, 
+        weapons: [], spells: [], inventory: [], notes: "", 
+        slots: [0,0,0,0,0,0,0,0,0],
+        wallet: { gp: 0, sp: 0, cp: 0 }
+    };
+
+    let chars = JSON.parse(localStorage.getItem('dnd_v1_2026')) || [{...template}];
+    let idx = parseInt(localStorage.getItem('dnd_idx_2026')) || 0;
+
+    const save = () => { localStorage.setItem('dnd_v1_2026', JSON.stringify(chars)); localStorage.setItem('dnd_idx_2026', idx); };
+
+    // --- ФУНКЦІЇ ВІДОБРАЖЕННЯ (RENDER) ---
+
+    // Оголошуємо через window, щоб уникнути помилок redeclare та мати доступ з HTML
+    window.renderHP = () => {
+        const c = chars[idx];
+        const hpBar = document.getElementById('hp-bar');
+        const curHPText = document.getElementById('cur-hp');
+        if (!hpBar || !curHPText) return;
+
+        const max = c.maxHP || 1;
+        const percent = (c.curHP / max) * 100;
         
-        // Шаблон з виправленим об'єктом wallet
-        const template = { 
-            name: "Новий Герой", race: "", class: "", prof: 2, 
-            stats: { "СИЛ": 10, "СПР": 10, "ТІЛ": 10, "ІНТ": 10, "МУД": 10, "ХАР": 10 }, 
-            ac: 10, init: 0, spd: "30 фт", curHP: 10, maxHP: 10, 
-            weapons: [], spells: [], inventory: [], notes: "", 
-            slots: [0,0,0,0,0,0,0,0,0],
-            wallet: { gp: 0, sp: 0, cp: 0 }
-        };
+        hpBar.style.width = Math.min(100, Math.max(0, percent)) + '%';
+        curHPText.innerText = c.curHP;
 
-        let chars = JSON.parse(localStorage.getItem('dnd_v1_2026')) || [{...template}];
-        let idx = parseInt(localStorage.getItem('dnd_idx_2026')) || 0;
+        // Зміна кольору полоски
+        if (percent < 25) hpBar.style.backgroundColor = "#ef4444";
+        else if (percent < 50) hpBar.style.backgroundColor = "#f59e0b";
+        else hpBar.style.backgroundColor = "#16a34a";
+    };
 
-        const save = () => { localStorage.setItem('dnd_v1_2026', JSON.stringify(chars)); localStorage.setItem('dnd_idx_2026', idx); };
+    const renderStats = () => {
+        document.getElementById('stats').innerHTML = Object.entries(chars[idx].stats).map(([k, v]) => {
+            const mod = Math.floor((v - 10) / 2);
+            return `<div class="stat-box"><p class="text-[9px] text-gray-500 uppercase font-bold">${k}</p><input type="number" value="${v}" oninput="window.updStat('${k}', this.value)" class="w-full text-center text-xl font-bold bg-transparent border-none p-0 outline-none"><p class="text-xs text-gold">${mod >= 0 ? '+' : ''}${mod}</p></div>`;
+        }).join('');
+    };
 
-        window.upd = (field) => {
-            const c = chars[idx];
-            const val = document.getElementById(field).value;
-            if (field === 'name') c.name = val;
-            else if (field === 'race') c.race = val;
-            else if (field === 'class') c.class = val;
-            else if (field === 'prof' || field === 'ac' || field === 'init' || field === 'max-hp') c[field] = parseInt(val) || 0;
-            else if (field === 'spd' || field === 'notes') c[field] = val;
-            
-            if (field === 'max-hp') renderHP();
-            if (field === 'name') renderSelector();
-            save();
-        };
+    const renderSkills = () => {
+        document.getElementById('skills').innerHTML = skillNames.map(s => {
+            const key = s.match(/\((.*?)\)/)[1];
+            const mod = Math.floor((chars[idx].stats[key]-10)/2);
+            return `<div class="flex justify-between border-b border-white/5 py-1"><span>${s}</span><span class="text-gold font-bold">${mod >= 0 ? '+' : ''}${mod}</span></div>`;
+        }).join('');
+    };
 
-        window.updStat = (k, v) => { chars[idx].stats[k] = parseInt(v) || 0; renderStats(); renderSkills(); save(); };
-        window.updWallet = (curr) => { chars[idx].wallet[curr] = parseInt(document.getElementById(curr).value) || 0; save(); };
+    const renderSlots = () => {
+        document.getElementById('slots').innerHTML = slotCounts.map((m, l) => `
+            <div class="flex justify-between items-center bg-black/20 p-2 rounded">
+                <span class="text-[10px] text-gray-500 uppercase">Рівень ${l+1}</span>
+                <div class="flex gap-1.5">${Array.from({length: m}, (_, i) => `<div onclick="window.tglSlot(${l}, ${i})" class="slot-circle ${i < chars[idx].slots[l] ? 'filled' : ''}"></div>`).join('')}</div>
+            </div>`).join('');
+    };
 
-        window.modHP = (m) => {
-            const val = parseInt(document.getElementById('hp-amt').value) || 0;
-            chars[idx].curHP = m > 0 ? Math.min(chars[idx].maxHP, chars[idx].curHP + val) : Math.max(0, chars[idx].curHP - val);
-            document.getElementById('hp-amt').value = ''; renderHP(); save();
-        };
-
-        // --- ФУНКЦІЇ ВИДАЛЕННЯ ---
-        window.delItem = (type, i) => {
-            if (type === 'wp') chars[idx].weapons.splice(i, 1);
-            if (type === 'sp') chars[idx].spells.splice(i, 1);
-            if (type === 'it') chars[idx].inventory.splice(i, 1);
-            
-            save();
-            if (type === 'wp') renderWeapons();
-            if (type === 'sp') renderSpells();
-            if (type === 'it') renderInv();
-        };
-
-        window.addWeapon = () => {
-            const n = document.getElementById('wp-n').value, a = document.getElementById('wp-a').value, d = document.getElementById('wp-d').value;
-            if(n) { chars[idx].weapons.push({n, a, d}); renderWeapons(); save(); 
-            document.getElementById('wp-n').value=''; document.getElementById('wp-a').value=''; document.getElementById('wp-d').value=''; }
-        };
-
-        window.addSpell = () => {
-            const n = document.getElementById('sp-n').value, l = document.getElementById('sp-l').value, d = document.getElementById('sp-d').value;
-            if(n) { chars[idx].spells.push({n, l: parseInt(l), d}); renderSpells(); save(); 
-            document.getElementById('sp-n').value=''; document.getElementById('sp-d').value=''; }
-        };
-
-        window.addItem = () => {
-            const n = document.getElementById('it-n').value, d = document.getElementById('it-d').value;
-            if(n) { chars[idx].inventory.push({n, d}); renderInv(); save(); 
-            document.getElementById('it-n').value=''; document.getElementById('it-d').value=''; }
-        };
-
-        const renderStats = () => {
-            document.getElementById('stats').innerHTML = Object.entries(chars[idx].stats).map(([k, v]) => {
-                const mod = Math.floor((v - 10) / 2);
-                return `<div class="stat-box"><p class="text-[9px] text-gray-500 uppercase font-bold">${k}</p><input type="number" value="${v}" oninput="window.updStat('${k}', this.value)" class="w-full text-center text-xl font-bold bg-transparent border-none p-0 outline-none"><p class="text-xs text-gold">${mod >= 0 ? '+' : ''}${mod}</p></div>`;
-            }).join('');
-        };
-
-        const renderSkills = () => {
-            document.getElementById('skills').innerHTML = skillNames.map(s => {
-                const key = s.match(/\((.*?)\)/)[1];
-                const mod = Math.floor((chars[idx].stats[key]-10)/2);
-                return `<div class="flex justify-between border-b border-white/5 py-1"><span>${s}</span><span class="text-gold font-bold">${mod >= 0 ? '+' : ''}${mod}</span></div>`;
-            }).join('');
-        };
-
-        const renderHP = () => {
-            const c = chars[idx]; document.getElementById('hp-bar').style.width = ((c.curHP / (c.maxHP || 1)) * 100) + '%';
-            document.getElementById('cur-hp').innerText = c.curHP;
-        };
-
-        const renderSlots = () => {
-            document.getElementById('slots').innerHTML = slotCounts.map((m, l) => `
-                <div class="flex justify-between items-center bg-black/20 p-2 rounded">
-                    <span class="text-[10px] text-gray-500 uppercase">Рівень ${l+1}</span>
-                    <div class="flex gap-1.5">${Array.from({length: m}, (_, i) => `<div onclick="window.tglSlot(${l}, ${i})" class="slot-circle ${i < chars[idx].slots[l] ? 'filled' : ''}"></div>`).join('')}</div>
-                </div>`).join('');
-        };
-        window.tglSlot = (l, i) => { chars[idx].slots[l] = (chars[idx].slots[l] === i + 1) ? i : i + 1; renderSlots(); save(); };
-
-        const renderWeapons = () => {
-            document.getElementById('weapon-list').innerHTML = chars[idx].weapons.map((w, i) => `
-                <div class="bg-black/40 p-2 rounded border border-white/5">
-                    <div class="flex justify-between">
-                        <div class="cursor-pointer" onclick="this.parentElement.nextElementSibling.classList.toggle('show')">
-                            <span class="text-xs font-bold text-red-500">${w.a} <span class="text-gray-200 ml-2 font-normal">${w.n}</span></span>
-                        </div>
-                        <i class="fa-solid fa-xmark del-btn text-xs" onclick="window.delItem('wp', ${i})"></i>
-                    </div><div class="hidden-content item-desc">${w.d || 'Опис відсутній'}</div>
-                </div>`).join('');
-        };
-
-        const renderSpells = () => {
-            const sorted = [...chars[idx].spells].sort((a,b)=>a.l-b.l);
-            document.getElementById('spell-list').innerHTML = sorted.map((s, i) => `
-                <div class="bg-black/40 p-2 rounded border border-white/5">
-                    <div class="flex justify-between">
-                        <div class="cursor-pointer" onclick="this.parentElement.nextElementSibling.classList.toggle('show')">
-                            <span class="text-[10px] text-purple-400 font-bold">${s.l==0?'Змова':'Рівень '+s.l} <span class="text-gray-200 ml-1 font-normal text-xs">${s.n}</span></span>
-                        </div>
-                        <i class="fa-solid fa-xmark del-btn text-xs" onclick="window.delItem('sp', ${chars[idx].spells.indexOf(s)})"></i>
-                    </div><div class="hidden-content item-desc">${s.d || 'Ефект не описано'}</div>
-                </div>`).join('');
-        };
-
-        const renderInv = () => {
-            document.getElementById('inv-list').innerHTML = chars[idx].inventory.map((it, i) => `
-                <div class="bg-black/40 p-2 rounded border border-white/5">
-                    <div class="flex justify-between">
-                        <div class="cursor-pointer text-xs text-gold/80" onclick="this.parentElement.nextElementSibling.classList.toggle('show')">${it.n}</div>
-                        <i class="fa-solid fa-xmark del-btn text-xs" onclick="window.delItem('it', ${i})"></i>
+    const renderWeapons = () => {
+        document.getElementById('weapon-list').innerHTML = chars[idx].weapons.map((w, i) => `
+            <div class="bg-black/40 p-2 rounded border border-white/5">
+                <div class="flex justify-between">
+                    <div class="cursor-pointer" onclick="this.parentElement.nextElementSibling.classList.toggle('show')">
+                        <span class="text-xs font-bold text-red-500">${w.a} <span class="text-gray-200 ml-2 font-normal">${w.n}</span></span>
                     </div>
-                    <div class="hidden-content item-desc">${it.d || 'Без опису'}</div>
-                </div>`).join('');
-        };
+                    <i class="fa-solid fa-xmark del-btn text-xs" onclick="window.delItem('wp', ${i})"></i>
+                </div><div class="hidden-content item-desc">${w.d || 'Опис відсутній'}</div>
+            </div>`).join('');
+    };
 
-        const renderSelector = () => { document.getElementById('char-select').innerHTML = chars.map((c, i) => `<option value="${i}" ${i==idx?'selected':''}>${c.name}</option>`).join(''); };
-        window.switchChar = () => { idx = parseInt(document.getElementById('char-select').value); renderAll(); save(); };
-        window.newChar = () => { chars.push(JSON.parse(JSON.stringify(template))); idx = chars.length - 1; renderAll(); save(); };
-        window.deleteChar = () => { if(chars.length > 1 && confirm("Видалити героя?")) { chars.splice(idx, 1); idx = 0; renderAll(); save(); } };
-        window.longRest = () => { chars[idx].curHP = chars[idx].maxHP; chars[idx].slots = [0,0,0,0,0,0,0,0,0]; renderHP(); renderSlots(); save(); alert("Відпочинок завершено!"); };
+    const renderSpells = () => {
+        const sorted = [...chars[idx].spells].sort((a,b)=>a.l-b.l);
+        document.getElementById('spell-list').innerHTML = sorted.map((s, i) => `
+            <div class="bg-black/40 p-2 rounded border border-white/5">
+                <div class="flex justify-between">
+                    <div class="cursor-pointer" onclick="this.parentElement.nextElementSibling.classList.toggle('show')">
+                        <span class="text-[10px] text-purple-400 font-bold">${s.l==0?'Змова':'Рівень '+s.l} <span class="text-gray-200 ml-1 font-normal text-xs">${s.n}</span></span>
+                    </div>
+                    <i class="fa-solid fa-xmark del-btn text-xs" onclick="window.delItem('sp', ${chars[idx].spells.indexOf(s)})"></i>
+                </div><div class="hidden-content item-desc">${s.d || 'Ефект не описано'}</div>
+            </div>`).join('');
+    };
 
-        const renderAll = () => {
-            const c = chars[idx];
-            document.getElementById('name').value = c.name;
-            document.getElementById('race').value = c.race || "";
-            document.getElementById('class').value = c.class || "";
-            document.getElementById('prof').value = c.prof;
-            document.getElementById('ac').value = c.ac;
-            document.getElementById('init').value = c.init;
-            document.getElementById('spd').value = c.spd;
-            document.getElementById('max-hp').value = c.maxHP;
-            document.getElementById('notes').value = c.notes || "";
-            
-            if(!c.wallet) c.wallet = {gp:0, sp:0, cp:0};
-            document.getElementById('gp').value = c.wallet.gp;
-            document.getElementById('sp').value = c.wallet.sp;
-            document.getElementById('cp').value = c.wallet.cp;
+    const renderInv = () => {
+        document.getElementById('inv-list').innerHTML = chars[idx].inventory.map((it, i) => `
+            <div class="bg-black/40 p-2 rounded border border-white/5">
+                <div class="flex justify-between">
+                    <div class="cursor-pointer text-xs text-gold/80" onclick="this.parentElement.nextElementSibling.classList.toggle('show')">${it.n}</div>
+                    <i class="fa-solid fa-xmark del-btn text-xs" onclick="window.delItem('it', ${i})"></i>
+                </div>
+                <div class="hidden-content item-desc">${it.d || 'Без опису'}</div>
+            </div>`).join('');
+    };
 
-            renderStats(); renderSkills(); renderHP(); renderSlots(); renderWeapons(); renderSpells(); renderInv(); renderSelector();
-        };
+    const renderSelector = () => { document.getElementById('char-select').innerHTML = chars.map((c, i) => `<option value="${i}" ${i==idx?'selected':''}>${c.name}</option>`).join(''); };
 
-        window.syncToCloud = async () => {
-            const id = document.getElementById('sync-id').value;
-            if(!id) return alert("Вкажи Cloud ID!");
-            try { await setDoc(doc(db, "characters", id), chars[idx]); alert("Збережено в хмарі!"); } 
-            catch(e) { console.error(e); alert("Помилка синхронізації."); }
-        };
+    // --- ФУНКЦІЇ ОНОВЛЕННЯ (UPDATES) ---
 
-        window.syncFromCloud = async () => {
-            const id = document.getElementById('sync-id').value;
-            if(!id) return alert("Вкажи Cloud ID!");
-            try {
-                const docSnap = await getDoc(doc(db, "characters", id));
-                if (docSnap.exists()) { chars[idx] = docSnap.data(); renderAll(); save(); alert("Героя завантажено!"); } 
-                else { alert("ID не знайдено."); }
-            } catch(e) { alert("Помилка завантаження."); }
-        };
+    window.upd = (field) => {
+        const c = chars[idx];
+        const val = document.getElementById(field).value;
 
-        renderAll();
-    </script>
+        if (field === 'name') {
+            c.name = val;
+            renderSelector();
+        } else if (field === 'max-hp') {
+            c.maxHP = parseInt(val) || 1;
+            if (c.curHP > c.maxHP) c.curHP = c.maxHP;
+            window.renderHP();
+        } else if (field === 'prof' || field === 'ac' || field === 'init') {
+            c[field] = parseInt(val) || 0;
+        } else if (field === 'race' || field === 'class' || field === 'spd' || field === 'notes') {
+            c[field] = val;
+        }
+        save();
+    };
+
+    window.updStat = (k, v) => { chars[idx].stats[k] = parseInt(v) || 0; renderStats(); renderSkills(); save(); };
+    window.updWallet = (curr) => { chars[idx].wallet[curr] = parseInt(document.getElementById(curr).value) || 0; save(); };
+
+    window.modHP = (m) => {
+        const val = parseInt(document.getElementById('hp-amt').value) || 0;
+        chars[idx].curHP = m > 0 ? Math.min(chars[idx].maxHP, chars[idx].curHP + val) : Math.max(0, chars[idx].curHP - val);
+        document.getElementById('hp-amt').value = ''; 
+        window.renderHP(); 
+        save();
+    };
+
+    window.tglSlot = (l, i) => { chars[idx].slots[l] = (chars[idx].slots[l] === i + 1) ? i : i + 1; renderSlots(); save(); };
+
+    // --- КЕРУВАННЯ ГЕРОЯМИ ТА СПИСКАМИ ---
+
+    window.switchChar = () => { idx = parseInt(document.getElementById('char-select').value); renderAll(); save(); };
+    window.newChar = () => { chars.push(JSON.parse(JSON.stringify(template))); idx = chars.length - 1; renderAll(); save(); };
+    window.deleteChar = () => { if(chars.length > 1 && confirm("Видалити героя?")) { chars.splice(idx, 1); idx = 0; renderAll(); save(); } };
+    
+    window.delItem = (type, i) => {
+        if (type === 'wp') chars[idx].weapons.splice(i, 1);
+        if (type === 'sp') chars[idx].spells.splice(i, 1);
+        if (type === 'it') chars[idx].inventory.splice(i, 1);
+        save();
+        if (type === 'wp') renderWeapons();
+        if (type === 'sp') renderSpells();
+        if (type === 'it') renderInv();
+    };
+
+    window.addWeapon = () => {
+        const n = document.getElementById('wp-n').value, a = document.getElementById('wp-a').value, d = document.getElementById('wp-d').value;
+        if(n) { chars[idx].weapons.push({n, a, d}); renderWeapons(); save(); 
+        document.getElementById('wp-n').value=''; document.getElementById('wp-a').value=''; document.getElementById('wp-d').value=''; }
+    };
+
+    window.addSpell = () => {
+        const n = document.getElementById('sp-n').value, l = document.getElementById('sp-l').value, d = document.getElementById('sp-d').value;
+        if(n) { chars[idx].spells.push({n, l: parseInt(l), d}); renderSpells(); save(); 
+        document.getElementById('sp-n').value=''; document.getElementById('sp-d').value=''; }
+    };
+
+    window.addItem = () => {
+        const n = document.getElementById('it-n').value, d = document.getElementById('it-d').value;
+        if(n) { chars[idx].inventory.push({n, d}); renderInv(); save(); 
+        document.getElementById('it-n').value=''; document.getElementById('it-d').value=''; }
+    };
+
+    window.longRest = () => { 
+        chars[idx].curHP = chars[idx].maxHP; 
+        chars[idx].slots = [0,0,0,0,0,0,0,0,0]; 
+        window.renderHP(); 
+        renderSlots(); 
+        save(); 
+        alert("Відпочинок завершено!"); 
+    };
+
+    const renderAll = () => {
+        const c = chars[idx];
+        document.getElementById('name').value = c.name;
+        document.getElementById('race').value = c.race || "";
+        document.getElementById('class').value = c.class || "";
+        document.getElementById('prof').value = c.prof;
+        document.getElementById('ac').value = c.ac;
+        document.getElementById('init').value = c.init;
+        document.getElementById('spd').value = c.spd;
+        document.getElementById('max-hp').value = c.maxHP;
+        document.getElementById('notes').value = c.notes || "";
+        
+        if(!c.wallet) c.wallet = {gp:0, sp:0, cp:0};
+        document.getElementById('gp').value = c.wallet.gp;
+        document.getElementById('sp').value = c.wallet.sp;
+        document.getElementById('cp').value = c.wallet.cp;
+
+        renderStats(); renderSkills(); window.renderHP(); renderSlots(); renderWeapons(); renderSpells(); renderInv(); renderSelector();
+    };
+
+    // --- ХМАРНА СИНХРОНІЗАЦІЯ ---
+
+    window.syncToCloud = async () => {
+        const id = document.getElementById('sync-id').value;
+        if(!id) return alert("Вкажи Cloud ID!");
+        try { await setDoc(doc(db, "characters", id), chars[idx]); alert("Збережено в хмарі!"); } 
+        catch(e) { console.error(e); alert("Помилка синхронізації."); }
+    };
+
+    window.syncFromCloud = async () => {
+        const id = document.getElementById('sync-id').value;
+        if(!id) return alert("Вкажи Cloud ID!");
+        try {
+            const docSnap = await getDoc(doc(db, "characters", id));
+            if (docSnap.exists()) { chars[idx] = docSnap.data(); renderAll(); save(); alert("Героя завантажено!"); } 
+            else { alert("ID не знайдено."); }
+        } catch(e) { alert("Помилка завантаження."); }
+    };
+
+    // Запуск першого рендеру
+    renderAll();
+</script>
 </body>
 </html>
+
